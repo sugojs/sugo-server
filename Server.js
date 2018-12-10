@@ -6,6 +6,14 @@ const Router = require("router");
 const finalhandler = require("finalhandler");
 
 class SuGoServer extends Server {
+  /**
+   *
+   * @param {Router} router: PillarJS router
+   * @param {*} logger: Any object with the usual logging methods (log, debug, info, error)
+   * @param {*} [options={}]
+   * @param {*} [options.IncomingMessage=SuGoRequest]: NodeJS Http incoming message subclass
+   * @param {*} [options.ServerResponse=SuGoResponse]: NodeJS Http Server response subclass
+   */
   constructor(router = new Router(), logger = console, options = {}) {
     options = Object.assign(
       {
@@ -15,6 +23,7 @@ class SuGoServer extends Server {
       options
     );
     super(options);
+    this.options = options;
     this.router = router;
     this.logger = logger;
     this.usesDefaultErrorHandler = false;
@@ -23,6 +32,7 @@ class SuGoServer extends Server {
       .addListener("listening", this.listeningEventHandler)
       .addListener("request", this.requestEventHandler);
   }
+
   closeEventHandler() {
     this.logger.log("The connection has been closed!");
   }
