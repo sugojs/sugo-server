@@ -4,7 +4,7 @@
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Francisco Javier Sucre González",
     "email": "franciscojsucreg@gmail.com",
