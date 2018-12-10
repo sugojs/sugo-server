@@ -2,16 +2,20 @@ const http = require("http");
 const ServerResponse = http.ServerResponse;
 
 class SuGoResponse extends ServerResponse {
-  constructor(req, logger = console) {
+  constructor(req) {
     super(req);
     this.body = {};
-    this.logger = logger;
+    this.logger = console;
     this.id = req.id;
     this.path = req.path;
     this.method = req.method;
     this.on("close", this.closeEventHandler);
     this.on("error", this.errorEventHandler);
     this.on("finish", this.finishEventHandler);
+  }
+
+  setLogger(logger) {
+    this.logger = logger;
   }
 
   closeEventHandler() {

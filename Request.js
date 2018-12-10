@@ -3,9 +3,9 @@ const IncomingMessage = http.IncomingMessage;
 const qs = require("querystring");
 
 class SuGoRequest extends IncomingMessage {
-  constructor(socket, logger = console) {
+  constructor(socket) {
     super(socket);
-    this.logger = logger;
+    this.logger = console;
     this.body = [];
     this.setId()
       .proccessUrl()
@@ -20,6 +20,10 @@ class SuGoRequest extends IncomingMessage {
       .substr(2);
     this.id = id;
     return this;
+  }
+
+  setLogger(logger) {
+    this.logger = logger;
   }
 
   proccessUrl() {
