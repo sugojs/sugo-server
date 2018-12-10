@@ -1,43 +1,27 @@
 {
-  "_from": "@sugo/server",
-  "_id": "@sugo/server@1.0.0",
-  "_inBundle": false,
-  "_integrity": "sha512-Nypo8lHk+dUFc+FEN/bHNk2uLseHXov5eOGzZnqNqrmq7cGTddcdrjepdwMeBs7QY7REKa4jqMs+AMWcpplXtg==",
-  "_location": "/@sugo/server",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "@sugo/server",
-    "name": "@sugo/server",
-    "escapedName": "@sugo%2fserver",
-    "scope": "@sugo",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/@sugo/server/-/server-1.0.0.tgz",
-  "_shasum": "03d1ac6220add038a8e1b5577c82d46a6b0a7851",
-  "_spec": "@sugo/server",
-  "_where": "D:\\Repositorios\\node-server-pillarjs",
-  "author": "",
-  "bundleDependencies": false,
-  "dependencies": {
-    "finalhandler": "^1.1.1",
-    "router": "^1.3.3"
-  },
-  "deprecated": false,
-  "description": "",
-  "license": "ISC",
-  "main": "index.js",
   "name": "@sugo/server",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.0"
+  "version": "1.0.0",
+  "author": {
+    "name": "Francisco Javier Sucre González",
+    "email": "franciscojsucreg@gmail.com",
+    "url": "https://github.com/franciscosucre"
+  },
+  "dependencies": {
+    "finalhandler": "^1.1.1",
+    "router": "^1.3.3"
+  },
+  "description": "",
+  "license": "ISC",
+  "main": "index.js",
+  "keywords": [
+    "server",
+    "http",
+    "pillarjs",
+    "request"
+  ]
+  
 }
