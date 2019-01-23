@@ -7,8 +7,6 @@ The server implements:
 - Request body extraction
 - Request Logging
 - Response Logging
-- Routing
-- Error Handling
 
 All this is implemented on a Server class that can be subclassed in order to extend it
 
@@ -19,11 +17,10 @@ router = new Router(), logger = console, options = {}
 ## **Options**
 
 - **@param {Router} router:** PillarJS router
-- **@param {*} logger:** Any object with the usual logging methods (log, debug, info, error)
-- **@param {*} [options={}]**
-- **@param {*} [options.IncomingMessage=SuGoRequest]:** NodeJS Http incoming message subclass
-- **@param {*} [options.ServerResponse=SuGoResponse]:** NodeJS Http Server response subclass
-
+- **@param {\*} logger:** Any object with the usual logging methods (log, debug, info, error)
+- **@param {\*} [options={}]**
+- **@param {\*} [options.IncomingMessage=SuGoRequest]:** NodeJS Http incoming message subclass
+- **@param {\*} [options.ServerResponse=SuGoResponse]:** NodeJS Http Server response subclass
 
 ## **How to install**
 

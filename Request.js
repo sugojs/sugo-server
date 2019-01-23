@@ -7,7 +7,7 @@ class SuGoRequest extends IncomingMessage {
   constructor(socket) {
     super(socket);
     this.setId();
-    this.rawBody = new Buffer("", "utf8");
+    this.rawBody = Buffer.from("", "utf8");
     this.body = {};
     this.path = "";
     this.query = {};
@@ -45,7 +45,7 @@ class SuGoRequest extends IncomingMessage {
     const req = this;
     return new Promise(resolve => {
       this.on("data", data => {
-        let auxBuffer = new Buffer(data, "utf8");
+        let auxBuffer = Buffer.from(data, "utf8");
         req.rawBody = Buffer.concat([req.rawBody, auxBuffer]);
       }).on("end", () => {
         req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};

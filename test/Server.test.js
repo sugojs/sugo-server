@@ -105,7 +105,7 @@ describe("SuGo Server", () => {
       server.useMiddleware((req, res) => (req.second = true));
       const response = await chai.request(server).get(PATH);
       response.body.should.have.property("first");
-      response.body.should.be.eql(true);
+      response.body.first.should.be.eql(true);
       response.body.should.have.property("second");
       response.body.second.should.be.eql(true);
     });
