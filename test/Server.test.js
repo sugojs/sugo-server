@@ -15,6 +15,37 @@ const HANDLER = (req, res) => {
 chai.use(chaiHttp);
 chai.should();
 
+class CustomError extends Error {
+  constructor(message) {
+    super(message);
+    this.status = 400;
+    this.name = "CustomError";
+    this.code = "CustomError";
+    this.extraData = true;
+  }
+}
+
+class CustomHandledError extends CustomError {
+  constructor(message) {
+    super(message);
+    this.status = 400;
+    this.name = "CustomHandledError";
+    this.code = "CustomHandledError";
+    this.extraData = true;
+  }
+
+  handle(req, res) {
+    const json = {
+      status: this.status,
+      name: this.constructor.name,
+      code: this.code,
+      message: this.message,
+      extraData: this.extraData
+    };
+    res.status(json.status).json(json);
+  }
+}
+
 //Our parent block
 describe("SuGo Server", () => {
   let server = new SuGoServer(HANDLER, null);
@@ -109,6 +140,46 @@ describe("SuGo Server", () => {
       response.body.should.have.property("second");
       response.body.second.should.be.eql(true);
     });
+  });
+
+  describe(`Error handler`, () => {
+    it("should handle the unexpected error", async function() {
+      const errorMessage = "New error";
+      const server = new SuGoServer((req, res) => {
+        throw new Error(errorMessage);
+      }, null);
+      const response = await chai.request(server).get(PATH);
+      response.status.should.be.eql(500);
+      response.body.name.should.be.eql("Error");
+      response.body.message.should.be.eql(errorMessage);
+    });
+
+    it("should handle the custom error the default way", async function() {
+      const errorMessage = "New error";
+      const server = new SuGoServer((req, res) => {
+        throw new CustomError("New error");
+      }, null);
+      const response = await chai.request(server).get(PATH);
+      response.status.should.be.eql(400);
+      response.body.name.should.be.eql("CustomError");
+      response.body.message.should.be.eql(errorMessage);
+      response.body.should.not.have.property("extraData");
+    });
+
+    it("should handle the custom error with it's handle method", async function() {
+      const errorMessage = "New error";
+      const server = new SuGoServer((req, res) => {
+        throw new CustomHandledError("New error");
+      }, null);
+      const response = await chai.request(server).get(PATH);
+      response.status.should.be.eql(400);
+      response.body.name.should.be.eql("CustomHandledError");
+      response.body.message.should.be.eql(errorMessage);
+      response.body.should.have.property("extraData");
+      response.body.extraData.should.be.eql(true);
+    });
+
+    CustomHandledError;
   });
 
   after(() => {

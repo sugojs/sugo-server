@@ -1,5 +1,9 @@
+const Server = require("./Server");
+const Request = require("./Request");
+const Response = require("./Response");
+
 module.exports = {
-  Server: require("./Server"),
-  Request: require("./Request"),
-  Response: require("./Response")
+  Server: Server,
+  Request: Request,
+  Response: Response
 };
