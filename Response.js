@@ -6,9 +6,7 @@ class SuGoResponse extends ServerResponse {
     super(req);
     this.body = {};
     this.logger = console;
-    this.id = req.id;
-    this.path = req.path;
-    this.method = req.method;
+
     this.on("close", this.closeEventHandler);
     this.on("error", this.errorEventHandler);
     this.on("finish", this.finishEventHandler);
@@ -19,18 +17,18 @@ class SuGoResponse extends ServerResponse {
   }
 
   closeEventHandler() {
-    this.logger.error("ERROR EVENT");
+    if (this.logger) this.logger.error("CLOSE EVENT");
   }
 
   errorEventHandler(err) {
-    this.logger.error("Response ERROR EVENT --> err", err);
+    if (this.logger) this.logger.error("Response ERROR EVENT --> err", err);
   }
 
   finishEventHandler() {
-    this.logResponse();
+    if (this.logger) this.log();
   }
 
-  logResponse() {
+  log() {
     const now = new Date().toISOString();
     const { id, statusCode, statusMessage, body, method, path } = this;
     const log = `${now}: Response ${id} ${method} ${path} ${statusCode} ${statusMessage} ---> body: ${JSON.stringify(
@@ -50,6 +48,7 @@ class SuGoResponse extends ServerResponse {
   }
 
   json(data) {
+    this.setHeader("Content-Type", "application/json");
     this.end(JSON.stringify(data));
     return this;
   }

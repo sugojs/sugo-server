@@ -1,17 +1,16 @@
 const http = require("http");
 const IncomingMessage = http.IncomingMessage;
-const qs = require("querystring");
+const url = require("url");
+const util = require("util");
 
 class SuGoRequest extends IncomingMessage {
   constructor(socket) {
     super(socket);
-    this.logger = console;
-    this.body = [];
-    this.setId()
-      .proccessUrl()
-      .on("error", this.errorEventHandler)
-      .on("data", this.dataEventHandler)
-      .on("end", this.endEventHandler);
+    this.setId();
+    this.rawBody = new Buffer("", "utf8");
+    this.body = {};
+    this.path = "";
+    this.query = {};
   }
 
   setId() {
@@ -24,54 +23,36 @@ class SuGoRequest extends IncomingMessage {
 
   setLogger(logger) {
     this.logger = logger;
-  }
-
-  proccessUrl() {
-    /* Querystring  */
-    const [path, querystring] = this.url.split("?");
-    this.path = path;
-    this.query = qs.parse(querystring) || {};
     return this;
   }
 
-  logRequest() {
-    /** We log our thisuest */
-    const now = new Date().toISOString(),
-      { id, method, path, query } = this;
-
-    if (["GET", "OPTIONS", "HEAD"].includes(this.method)) {
-      this.logger.info(
-        `${now}: Request ${id} ${method} ${path} --> query: ${JSON.stringify(
-          query
-        )}`
-      );
-    } else {
-      const { id, method, path, body } = this;
-      this.logger.info(
-        `${now}: Request ${id} ${method} ${path} --> body: ${JSON.stringify(
-          body
-        )}`
-      );
-    }
+  parseUrl() {
+    const { pathname, query } = url.parse(this.url, true);
+    this.path = pathname;
+    this.query = query;
+    return this;
   }
 
-  errorEventHandler(err) {
-    this.logger.error("Request Error Event --> err: ", err);
+  log() {
+    var log = util.format("Request ID: ( %s ) %s: %s", this.id, this.method, this.url);
+    if (Object.keys(this.query).length > 0) log += util.format(" --> query %j", this.query);
+    if (Object.keys(this.body).length > 0) log += util.format(" --> body %j", this.body);
+    this.logger.info(log);
+    return this;
   }
 
-  dataEventHandler(chunk) {
-    this.body = [];
-    this.body.push(chunk);
-  }
-
-  endEventHandler() {
-    /** We parse our thisuest body as a JSON object */
-    if (this.body.length > 0) {
-      this.body = JSON.parse(Buffer.concat(this.body).toString());
-    } else {
-      this.body = {};
-    }
-    this.logRequest();
+  async getBody() {
+    const req = this;
+    return new Promise(resolve => {
+      this.on("data", data => {
+        let auxBuffer = new Buffer(data, "utf8");
+        req.rawBody = Buffer.concat([req.rawBody, auxBuffer]);
+      }).on("end", () => {
+        req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
+        if (this.logger) req.log();
+        resolve(req.body);
+      });
+    });
   }
 }
 

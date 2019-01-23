@@ -2,86 +2,60 @@ const http = require("http");
 const Server = http.Server;
 const SuGoRequest = require("./Request");
 const SuGoResponse = require("./Response");
-const Router = require("router");
-const finalhandler = require("finalhandler");
+const assert = require("assert");
 
 class SuGoServer extends Server {
   /**
-   *
-   * @param {Router} router: PillarJS router
    * @param {*} logger: Any object with the usual logging methods (log, debug, info, error)
    * @param {*} [options={}]
    * @param {*} [options.IncomingMessage=SuGoRequest]: NodeJS Http incoming message subclass
    * @param {*} [options.ServerResponse=SuGoResponse]: NodeJS Http Server response subclass
    */
-  constructor(router = new Router(), logger = console, options = {}) {
-    options = Object.assign(
+  constructor(requestHandler, logger = console, httpServerOptions = {}) {
+    httpServerOptions = Object.assign(
       {
         IncomingMessage: SuGoRequest,
         ServerResponse: SuGoResponse
       },
-      options
+      httpServerOptions
     );
-    super(options);
-    this.options = options;
-    this.router = router;
+    assert(typeof requestHandler === "function", `The "requestHandler" must be a function. Value: ${requestHandler}`);
+    super(httpServerOptions);
+    this.middleware = [];
+    this.httpServerOptions = httpServerOptions;
     this.logger = logger;
     this.usesDefaultErrorHandler = false;
     this.addListener("close", this.closeEventHandler)
       .addListener("error", this.errorEventHandler)
       .addListener("listening", this.listeningEventHandler)
-      .addListener("request", this.requestEventHandler);
+      .addListener("request", async (req, res) => {
+        req.setLogger(this.logger).parseUrl();
+        res.setLogger(this.logger);
+        res.id = req.id;
+        res.path = req.path;
+        res.method = req.method;
+        await req.getBody(); // Adds body property to request
+        for (const fn of this.middleware) {
+          await fn(req, res);
+        }
+        await requestHandler(req, res); // User custom request Handler
+      });
   }
 
   closeEventHandler() {
-    this.logger.log("The connection has been closed!");
+    if (this.logger) this.logger.log("The connection has been closed!");
   }
 
   errorEventHandler(err) {
-    this.logger.error(
-      `An error has ocurred --> ${err.name} ${err.message} ${err.stack}`
-    );
+    if (this.logger) this.logger.error(`An error has ocurred --> ${err.name} ${err.message} ${err.stack}`);
   }
 
   listeningEventHandler() {
-    this.logger.log(`Listening on port "${this.address().port}"`);
+    if (this.logger) this.logger.log(`Listening on port "${this.address().port}"`);
   }
 
-  defaultErrorHandler(err, req, res, next) {
-    /* If the error object has a handle method we use it */
-    if (typeof err.handle === "function") {
-      err.handle(req, res);
-    } else {
-      const json = {
-        status: err.status || 500,
-        name: err.name || err.constructor.name,
-        code: err.code || "N/A",
-        message: err.message || "Unexpected Error"
-      };
-      if (err.stack) {
-        json.stack = err.stack;
-      }
-      res.status(json.status).json(json);
-      if (next) {
-        next();
-      }
-    }
-  }
-
-  useDefaultErrorHandler() {
-    const assert = require("assert");
-    assert.equal(this.usesDefaultErrorHandler, false);
-    this.router.use(this.defaultErrorHandler.bind(this));
-  }
-
-  requestEventHandler(req, res) {
-    /* We set up the same logger in the server that in the request and response  */
-    req.setLogger(this.logger);
-    res.setLogger(this.logger);
-    req.on("end", () => {
-      /** The default handler already makes all the setup so we just pass the router handler */
-      this.router(req, res, finalhandler(req, res));
-    });
+  useMiddleware(fn) {
+    this.middleware.push(fn);
   }
 }
 module.exports = SuGoServer;
