@@ -109,29 +109,12 @@ For loggind purposes, we copy the id, path and method properties from the reques
 ```javascript
 const { Server } = require("@sugo/server");
 const Router = require("@sugo/router");
+const cors = require("cors");
 
 const router = new Router();
 router.get("/foo", (req, res) => res.end(JSON.stringify({ foo: req.foo })));
 
-const server = new Server((req, res) =>
-  res.json({ first: req.first, second: req.second })
-);
-
-const handleError = (req, res, err) => {
-  const status = err.status || 500;
-  res.writeHead(status, headers);
-  res.end(
-    JSON.stringify({
-      code: err.code || err.name || "Error",
-      message: err.message || "An unexpected error has ocurred",
-      status
-    })
-  );
-};
-
-server.useMiddleware(cors());
-
-try {
+const server = new Server((req, res) => {
   if (!router.match(req.method, res.url))
     throw {
       name: "ResourceNotFound",
@@ -139,7 +122,7 @@ try {
       status: 404
     };
   await router.handle(req, res);
-} catch (error) {
-  handleError(req, res, error);
-}
+});
+
+server.useMiddleware(cors());
 ```
