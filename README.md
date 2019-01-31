@@ -1,6 +1,8 @@
 # **@sugo/server**
 
-Http server abstraction that includes the minimal dependencies for a express-like API. Router agnostic. It is recommended to use with [@sugo/router](https://www.npmjs.com/package/@sugo/router)
+Http server abstraction that includes the minimal dependencies for a express-like API. It extends the vanilla NodeJS Http Server, Http Request and Http Response.
+
+Router agnostic. It is recommended to use with [@sugo/router](https://www.npmjs.com/package/@sugo/router).
 
 The server implements:
 
