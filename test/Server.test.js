@@ -1,5 +1,6 @@
 const chai = require("chai");
 const SuGoServer = require("../Server");
+const { createServer } = require("../index");
 const PATH = "/foo";
 const headers = { "Content-Type": "application/json" };
 const chaiHttp = require("chai-http");
@@ -48,7 +49,7 @@ class CustomHandledError extends CustomError {
 
 //Our parent block
 describe("SuGo Server", () => {
-  let server = new SuGoServer(HANDLER, null);
+  let server = createServer(HANDLER).setLogger(null);
   describe(`Request`, () => {
     it("The request id should be set", async function() {
       const response = await chai
@@ -108,20 +109,20 @@ describe("SuGo Server", () => {
 
     it("should have the status code sent to the status() method", async function() {
       const status = 201;
-      const server = new SuGoServer((req, res) => {
+      const server = createServer((req, res) => {
         res.status(status);
         res.end();
-      }, null);
+      }).setLogger(null);
       const response = await chai.request(server).get(PATH);
       response.should.have.status(status);
     });
 
     it("should have the body sent to the json() method", async function() {
       const status = 201;
-      const server = new SuGoServer((req, res) => {
+      const server = createServer((req, res) => {
         res.status(status);
         res.json({ foo: "fighters" });
-      }, null);
+      }).setLogger(null);
       const response = await chai.request(server).get(PATH);
       response.should.have.status(status);
       response.body.should.have.property("foo");
@@ -131,7 +132,7 @@ describe("SuGo Server", () => {
 
   describe(`Middleware`, () => {
     it("should run the added middleware", async function() {
-      const server = new SuGoServer((req, res) => res.json({ first: req.first, second: req.second }), null);
+      const server = createServer((req, res) => res.json({ first: req.first, second: req.second })).setLogger(null);
       server.useMiddleware((req, res) => (req.first = true));
       server.useMiddleware((req, res) => (req.second = true));
       const response = await chai.request(server).get(PATH);
@@ -145,9 +146,9 @@ describe("SuGo Server", () => {
   describe(`Error handler`, () => {
     it("should handle the unexpected error", async function() {
       const errorMessage = "New error";
-      const server = new SuGoServer((req, res) => {
+      const server = createServer((req, res) => {
         throw new Error(errorMessage);
-      }, null);
+      }).setLogger(null);
       const response = await chai.request(server).get(PATH);
       response.status.should.be.eql(500);
       response.body.name.should.be.eql("Error");
@@ -156,9 +157,9 @@ describe("SuGo Server", () => {
 
     it("should handle the custom error the default way", async function() {
       const errorMessage = "New error";
-      const server = new SuGoServer((req, res) => {
+      const server = createServer((req, res) => {
         throw new CustomError("New error");
-      }, null);
+      }).setLogger(null);
       const response = await chai.request(server).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql("CustomError");
@@ -168,9 +169,9 @@ describe("SuGo Server", () => {
 
     it("should handle the custom error with it's handle method", async function() {
       const errorMessage = "New error";
-      const server = new SuGoServer((req, res) => {
+      const server = createServer((req, res) => {
         throw new CustomHandledError("New error");
-      }, null);
+      }).setLogger(null);
       const response = await chai.request(server).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql("CustomHandledError");

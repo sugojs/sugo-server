@@ -23,10 +23,25 @@ All this is implemented on a Server class that can be subclassed in order to ext
 - **@param {\*} [httpServerOptions.IncomingMessage=SuGoRequest]:** NodeJS Http incoming message subclass
 - **@param {\*} [httpServerOptions.ServerResponse=SuGoResponse]:** NodeJS Http Server response subclass
 
+## **Requirements**
+
+node version >= 9.11.2
+
 ## **How to install**
 
 ```shell
 npm install --save @sugo/server
+```
+
+## **Creating a Http Server**
+
+A server can be created using the new Server() constructor, but it is recommended to use the createServer method unless you have the need to use new Server().
+
+```javascript
+const server = createServer((req, res) =>
+  res.status(200).json({ first: req.first, second: req.second })
+);
+server.useMiddleware((req, res) => (req.foo = "fighters"));
 ```
 
 ## **Router Middleware**
@@ -34,7 +49,7 @@ npm install --save @sugo/server
 Middleware can be added for the whole server using the useMiddleware method. Any middleware added, will be executed before each request
 
 ```javascript
-const server = new Server((req, res) =>
+const server = createServer((req, res) =>
   res.status(200).json({ first: req.first, second: req.second })
 );
 server.useMiddleware((req, res) => (req.foo = "fighters"));
@@ -70,13 +85,12 @@ The idea behind this handler is to give custom exceptions the power to define ho
 
 ## **Logging**
 
-The server can receive any object with the common logger methods (log, info, error, warn, debug). It will use a console logger by default.
+The server can receive any object with the common logger methods (log, info, error, warn, debug). It will use a console logger by default. It can be set with the set Logger method.
 
 ```javascript
-const server = new Server(
-  (req, res) => res.status(200).json({ first: req.first, second: req.second }),
-  customLogger
-);
+const server = createServer((req, res) =>
+  res.status(200).json({ first: req.first, second: req.second })
+).setLogger(customLogger);
 ```
 
 The logger can be accesed via req.logger, res.logger or server.logger.
@@ -87,7 +101,7 @@ The logger can be accesed via req.logger, res.logger or server.logger.
 - res.status(status): Sets the status for the response
 
 ```javascript
-const server = new Server(
+const server = createServer(
   (req, res) => res.status(200).json({ first: req.first, second: req.second }),
   customLogger
 );
@@ -107,14 +121,15 @@ For loggind purposes, we copy the id, path and method properties from the reques
 ## **Complete Application Example**
 
 ```javascript
-const { Server } = require("@sugo/server");
+const { createServer } = require("@sugo/server");
 const Router = require("@sugo/router");
 const cors = require("cors");
 
 const router = new Router();
 router.get("/foo", (req, res) => res.end(JSON.stringify({ foo: req.foo })));
 
-const server = new Server((req, res) => {
+// createServer is
+const server = createServer(req, res) => {
   if (!router.match(req.method, res.url))
     throw {
       name: "ResourceNotFound",

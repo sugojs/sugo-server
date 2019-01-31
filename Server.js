@@ -62,6 +62,7 @@ class SuGoServer extends Server {
 
   useMiddleware(fn) {
     this.middleware.push(fn);
+    return this;
   }
 
   defaultErrorHandler(req, res, err) {
@@ -80,6 +81,11 @@ class SuGoServer extends Server {
       }
       res.status(json.status).json(json);
     }
+  }
+
+  setLogger(logger) {
+    this.logger = logger;
+    return this;
   }
 
   setErrorHandler(fn) {
