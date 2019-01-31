@@ -66,7 +66,7 @@ class SuGoServer extends Server {
 }
 ```
 
-The idea behind this handler is to give custom exceptions the power to define how should they be handled. This can be useful if the exception has custom data. If this error handler does not fufill your needs, it can be replace with the server.setErrorHandler method.
+The idea behind this handler is to give custom exceptions the power to define how should they be handled. This can be useful if the exception has custom data. If this error handler does not fufill your needs, it can be replaced with the server.setErrorHandler method that receives a function with the same signature.
 
 ## **Logging**
 
