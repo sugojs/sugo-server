@@ -84,6 +84,7 @@ class SuGoServer extends Server {
 
   setErrorHandler(fn) {
     this.handleError = fn;
+    return this;
   }
 }
 module.exports = SuGoServer;
