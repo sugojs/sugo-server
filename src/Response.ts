@@ -1,34 +1,45 @@
-const http = require("http");
+import * as http from "http";
+import { IError, ILogger } from "./Interfaces";
+import SuGoRequest from "./Request";
 const ServerResponse = http.ServerResponse;
 
-class SuGoResponse extends ServerResponse {
-  constructor(req) {
-    super(req);
-    this.body = {};
-    this.logger = console;
+export default class SuGoResponse extends ServerResponse {
+  public body = {};
+  public logger: ILogger = console;
+  public id = "";
+  public method = "";
+  public path = "";
 
+  constructor(req: SuGoRequest) {
+    super(req);
     this.on("close", this.closeEventHandler);
     this.on("error", this.errorEventHandler);
     this.on("finish", this.finishEventHandler);
   }
 
-  setLogger(logger) {
+  public setLogger(logger: ILogger) {
     this.logger = logger;
   }
 
-  closeEventHandler() {
-    if (this.logger) this.logger.error("CLOSE EVENT");
+  public closeEventHandler() {
+    if (this.logger) {
+      this.logger.error("CLOSE EVENT");
+    }
   }
 
-  errorEventHandler(err) {
-    if (this.logger) this.logger.error("Response ERROR EVENT --> err", err);
+  public errorEventHandler(err: IError) {
+    if (this.logger) {
+      this.logger.error("Response ERROR EVENT --> err", JSON.stringify(err));
+    }
   }
 
-  finishEventHandler() {
-    if (this.logger) this.log();
+  public finishEventHandler() {
+    if (this.logger) {
+      this.log();
+    }
   }
 
-  log() {
+  public log() {
     const now = new Date().toISOString();
     const { id, statusCode, statusMessage, body, method, path } = this;
     const log = `${now}: Response ${id} ${method} ${path} ${statusCode} ${statusMessage} ---> body: ${JSON.stringify(
@@ -42,23 +53,23 @@ class SuGoResponse extends ServerResponse {
     return this;
   }
 
-  status(code) {
+  public status(code: number) {
     this.statusCode = code;
     return this;
   }
 
-  json(data) {
+  public json(data: any) {
     this.setHeader("Content-Type", "application/json");
     this.end(JSON.stringify(data));
     return this;
   }
 
-  write(data) {
+  public write(data: any) {
     this.body = data;
     return super.write(data);
   }
 
-  end(data) {
+  public end(data: any) {
     this.body = data;
     return super.end(data);
   }
