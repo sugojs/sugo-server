@@ -14,7 +14,7 @@ const assert = require("assert");
 const Request_1 = require("./Request");
 const Response_1 = require("./Response");
 class SuGoServer extends Server {
-    constructor(requestHandler, logger = console) {
+    constructor(requestHandler) {
         super({
             IncomingMessage: Request_1.default,
             ServerResponse: Response_1.default
@@ -93,4 +93,3 @@ class SuGoServer extends Server {
     }
 }
 exports.default = SuGoServer;
-module.exports = SuGoServer;

@@ -9,7 +9,7 @@ export default class SuGoServer extends Server {
     logger: ILogger;
     middleware: IHandler[];
     handleError: IErrorHandler;
-    constructor(requestHandler: IHandler, logger?: ILogger);
+    constructor(requestHandler: IHandler);
     closeEventHandler(): void;
     errorEventHandler(err: IError): void;
     listeningEventHandler(): void;

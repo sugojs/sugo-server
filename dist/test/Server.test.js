@@ -9,14 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai = require("chai");
-const superagent = require("superagent");
+const chaiHttp = require("chai-http");
 const index_1 = require("../index");
 const CustomError_1 = require("./CustomError");
 const CustomHandledError_1 = require("./CustomHandledError");
 const DummyLogger_1 = require("./DummyLogger");
-const dummyLogger = new DummyLogger_1.default();
-const PATH = "http://localhost:3000/foo";
+const PATH = "/foo";
 const headers = { "Content-Type": "application/json" };
+const dummyLogger = new DummyLogger_1.default();
 const HANDLER = (req, res) => {
     res.writeHead(200, headers);
     res.end(JSON.stringify({
@@ -30,28 +30,21 @@ const HANDLER = (req, res) => {
         res: { id: res.id, path: res.path, method: res.method }
     }));
 };
+chai.use(chaiHttp);
 chai.should();
 // Our parent block
 describe("SuGo Server", () => {
     const server = index_1.createServer(HANDLER).setLogger(dummyLogger);
-    before(() => {
-        server.listen(3000);
-    });
-    after(() => {
-        server.close();
-    });
     describe(`Request`, () => {
         it("The request id should be set", () => __awaiter(this, void 0, void 0, function* () {
-            try {
-                const response = yield superagent.post(PATH).send({ foo: "fighters" });
-                response.body.req.should.have.property("id");
-            }
-            catch (error) {
-                console.error(error);
-            }
+            const response = yield chai
+                .request(server)
+                .post(PATH)
+                .send({ foo: "fighters" });
+            response.body.req.should.have.property("id");
         }));
         it("The request path should be set", () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield superagent.get(PATH);
+            const response = yield chai.request(server).get(PATH);
             response.body.req.should.have.property("path");
         }));
         it("The request body should be set if post data is sent", () => __awaiter(this, void 0, void 0, function* () {
@@ -83,12 +76,12 @@ describe("SuGo Server", () => {
             response.body.res.id.should.be.eql(response.body.req.id);
         }));
         it("The response path should be equal to the request path", () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield superagent.get(PATH);
+            const response = yield chai.request(server).get(PATH);
             response.body.res.should.have.property("path");
             response.body.res.path.should.be.eql(response.body.req.path);
         }));
         it("The response method should be equal to the request method", () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield superagent.get(PATH);
+            const response = yield chai.request(server).get(PATH);
             response.body.res.should.have.property("method");
             response.body.res.method.should.be.eql(response.body.req.method);
         }));
@@ -96,7 +89,7 @@ describe("SuGo Server", () => {
             const status = 201;
             const newServer = index_1.createServer((req, res) => {
                 res.status(status);
-                res.end({});
+                res.json({});
             }).setLogger(dummyLogger);
             const response = yield chai.request(newServer).get(PATH);
             response.should.have.status(status);
@@ -116,8 +109,8 @@ describe("SuGo Server", () => {
     describe(`Middleware`, () => {
         it("should run the added middleware", () => __awaiter(this, void 0, void 0, function* () {
             const newServer = index_1.createServer((req, res) => res.json({ first: req.first, second: req.second })).setLogger(dummyLogger);
-            server.useMiddleware((req, res) => (req.first = true));
-            server.useMiddleware((req, res) => (req.second = true));
+            newServer.useMiddleware((req, res) => (req.first = true));
+            newServer.useMiddleware((req, res) => (req.second = true));
             const response = yield chai.request(newServer).get(PATH);
             response.body.should.have.property("first");
             response.body.first.should.be.eql(true);
