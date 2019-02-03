@@ -3,12 +3,17 @@ import { IError, ILogger } from './Interfaces';
 import SuGoRequest from './Request';
 const ServerResponse = http.ServerResponse;
 
+export interface IDynamicObject {
+  [key: string]: any;
+}
+
 export default class SuGoResponse extends ServerResponse {
-  public body = {};
+  public body: IDynamicObject = {};
   public logger: ILogger = console;
   public id = '';
   public method = '';
   public path = '';
+  [key: string]: any;
 
   constructor(req: SuGoRequest) {
     super(req);
