@@ -4,14 +4,18 @@ import * as url from 'url';
 import * as util from 'util';
 import { ILogger } from './Interfaces';
 
+export interface IDynamicObject {
+  [key: string]: any;
+}
+
 export default class SuGoRequest extends IncomingMessage {
   public id = Math.random()
     .toString(36)
     .substr(2);
-  public body = {};
+  public body: IDynamicObject = {};
   public rawBody = Buffer.from('', 'utf8');
   public path = '';
-  public query = {};
+  public query: IDynamicObject = {};
   public logger: ILogger = console;
   public url = '';
   public pathname = '';
