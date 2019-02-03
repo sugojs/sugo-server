@@ -8,6 +8,7 @@ import SuGoResponse from './Response';
 
 export type IHandler = (req: SuGoRequest, res: SuGoResponse) => void;
 export type IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IError) => void;
+export * from './Interfaces';
 
 export default class SuGoServer extends Server {
   public logger: ILogger = console;
