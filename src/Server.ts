@@ -1,6 +1,7 @@
 import * as http from 'http';
 const Server = http.Server;
 import * as assert from 'assert';
+import { AddressInfo } from 'net';
 import { IError, ILogger } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
@@ -44,7 +45,7 @@ export default class SuGoServer extends Server {
 
   public closeEventHandler() {
     if (this.logger) {
-      this.logger.log('The connection has been closed!');
+      this.logger.info('The connection has been closed!');
     }
   }
 
@@ -56,7 +57,7 @@ export default class SuGoServer extends Server {
 
   public listeningEventHandler() {
     if (this.logger) {
-      this.logger.log(`Listening on port "${this.address()}"`);
+      this.logger.info(`Listening on port "${(this.address() as AddressInfo).port}"`);
     }
   }
 
