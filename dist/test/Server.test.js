@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai = require("chai");
-const chaiHttp = require("chai-http");
+const supertest = require("supertest");
 const index_1 = require("../index");
 const CustomError_1 = require("./CustomError");
 const CustomHandledError_1 = require("./CustomHandledError");
@@ -30,26 +30,23 @@ const HANDLER = (req, res) => {
         res: { id: res.id, path: res.path, method: res.method },
     }));
 };
-chai.use(chaiHttp);
 chai.should();
 // Our parent block
 describe('SuGo Server', () => {
     const server = index_1.createServer(HANDLER).setLogger(dummyLogger);
     describe(`Request`, () => {
         it('The request id should be set', () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai
-                .request(server)
+            const response = yield supertest(server)
                 .post(PATH)
                 .send({ foo: 'fighters' });
             response.body.req.should.have.property('id');
         }));
         it('The request path should be set', () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai.request(server).get(PATH);
+            const response = yield supertest(server).get(PATH);
             response.body.req.should.have.property('path');
         }));
         it('The request body should be set if post data is sent', () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai
-                .request(server)
+            const response = yield supertest(server)
                 .post(PATH)
                 .send({ foo: 'fighters' });
             response.body.req.should.have.property('body');
@@ -57,8 +54,7 @@ describe('SuGo Server', () => {
             response.body.req.body.foo.should.be.eql('fighters');
         }));
         it('The request query should be set if queryparams are sent', () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai
-                .request(server)
+            const response = yield supertest(server)
                 .get(PATH)
                 .query({ foo: 'fighters' });
             response.body.req.should.have.property('query');
@@ -68,20 +64,19 @@ describe('SuGo Server', () => {
     });
     describe(`SuGoResponse`, () => {
         it('The response id should be equal to the request id', () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai
-                .request(server)
+            const response = yield supertest(server)
                 .post(PATH)
                 .send({ foo: 'fighters' });
             response.body.res.should.have.property('id');
             response.body.res.id.should.be.eql(response.body.req.id);
         }));
         it('The response path should be equal to the request path', () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai.request(server).get(PATH);
+            const response = yield supertest(server).get(PATH);
             response.body.res.should.have.property('path');
             response.body.res.path.should.be.eql(response.body.req.path);
         }));
         it('The response method should be equal to the request method', () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai.request(server).get(PATH);
+            const response = yield supertest(server).get(PATH);
             response.body.res.should.have.property('method');
             response.body.res.method.should.be.eql(response.body.req.method);
         }));
@@ -91,8 +86,8 @@ describe('SuGo Server', () => {
                 res.status(status);
                 res.json({});
             }).setLogger(dummyLogger);
-            const response = yield chai.request(newServer).get(PATH);
-            response.should.have.status(status);
+            const response = yield supertest(newServer).get(PATH);
+            response.status.should.be.eql(status);
         }));
         it('should have the body sent to the json() method', () => __awaiter(this, void 0, void 0, function* () {
             const status = 201;
@@ -100,8 +95,8 @@ describe('SuGo Server', () => {
                 res.status(status);
                 res.json({ foo: 'fighters' });
             }).setLogger(dummyLogger);
-            const response = yield chai.request(newServer).get(PATH);
-            response.should.have.status(status);
+            const response = yield supertest(newServer).get(PATH);
+            response.status.should.be.eql(status);
             response.body.should.have.property('foo');
             response.body.foo.should.be.eql('fighters');
         }));
@@ -111,7 +106,7 @@ describe('SuGo Server', () => {
             const newServer = index_1.createServer((req, res) => res.json({ first: req.first, second: req.second })).setLogger(dummyLogger);
             newServer.useMiddleware((req, res) => (req.first = true));
             newServer.useMiddleware((req, res) => (req.second = true));
-            const response = yield chai.request(newServer).get(PATH);
+            const response = yield supertest(newServer).get(PATH);
             response.body.should.have.property('first');
             response.body.first.should.be.eql(true);
             response.body.should.have.property('second');
@@ -124,7 +119,7 @@ describe('SuGo Server', () => {
             const newServer = index_1.createServer((req, res) => {
                 throw new Error(errorMessage);
             }).setLogger(dummyLogger);
-            const response = yield chai.request(newServer).get(PATH);
+            const response = yield supertest(newServer).get(PATH);
             response.status.should.be.eql(500);
             response.body.name.should.be.eql('Error');
             response.body.message.should.be.eql(errorMessage);
@@ -134,7 +129,7 @@ describe('SuGo Server', () => {
             const newServer = index_1.createServer((req, res) => {
                 throw new CustomError_1.default('New error');
             }).setLogger(dummyLogger);
-            const response = yield chai.request(newServer).get(PATH);
+            const response = yield supertest(newServer).get(PATH);
             response.status.should.be.eql(400);
             response.body.name.should.be.eql('CustomError');
             response.body.message.should.be.eql(errorMessage);
@@ -145,7 +140,7 @@ describe('SuGo Server', () => {
             const newServer = index_1.createServer((req, res) => {
                 throw new CustomHandledError_1.default('New error');
             }).setLogger(dummyLogger);
-            const response = yield chai.request(newServer).get(PATH);
+            const response = yield supertest(newServer).get(PATH);
             response.status.should.be.eql(400);
             response.body.name.should.be.eql('CustomHandledError');
             response.body.message.should.be.eql(errorMessage);

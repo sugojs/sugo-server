@@ -1,5 +1,5 @@
 import * as chai from 'chai';
-import chaiHttp = require('chai-http');
+import * as supertest from 'supertest';
 import { createServer } from '../index';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
@@ -25,7 +25,6 @@ const HANDLER = (req: SuGoRequest, res: SuGoResponse) => {
     }),
   );
 };
-chai.use(chaiHttp);
 chai.should();
 
 // Our parent block
@@ -33,21 +32,19 @@ describe('SuGo Server', () => {
   const server = createServer(HANDLER).setLogger(dummyLogger);
   describe(`Request`, () => {
     it('The request id should be set', async () => {
-      const response = await chai
-        .request(server)
+      const response = await supertest(server)
         .post(PATH)
         .send({ foo: 'fighters' });
       response.body.req.should.have.property('id');
     });
 
     it('The request path should be set', async () => {
-      const response = await chai.request(server).get(PATH);
+      const response = await supertest(server).get(PATH);
       response.body.req.should.have.property('path');
     });
 
     it('The request body should be set if post data is sent', async () => {
-      const response = await chai
-        .request(server)
+      const response = await supertest(server)
         .post(PATH)
         .send({ foo: 'fighters' });
       response.body.req.should.have.property('body');
@@ -56,8 +53,7 @@ describe('SuGo Server', () => {
     });
 
     it('The request query should be set if queryparams are sent', async () => {
-      const response = await chai
-        .request(server)
+      const response = await supertest(server)
         .get(PATH)
         .query({ foo: 'fighters' });
       response.body.req.should.have.property('query');
@@ -68,8 +64,7 @@ describe('SuGo Server', () => {
 
   describe(`SuGoResponse`, () => {
     it('The response id should be equal to the request id', async () => {
-      const response = await chai
-        .request(server)
+      const response = await supertest(server)
         .post(PATH)
         .send({ foo: 'fighters' });
       response.body.res.should.have.property('id');
@@ -77,13 +72,13 @@ describe('SuGo Server', () => {
     });
 
     it('The response path should be equal to the request path', async () => {
-      const response = await chai.request(server).get(PATH);
+      const response = await supertest(server).get(PATH);
       response.body.res.should.have.property('path');
       response.body.res.path.should.be.eql(response.body.req.path);
     });
 
     it('The response method should be equal to the request method', async () => {
-      const response = await chai.request(server).get(PATH);
+      const response = await supertest(server).get(PATH);
       response.body.res.should.have.property('method');
       response.body.res.method.should.be.eql(response.body.req.method);
     });
@@ -94,8 +89,8 @@ describe('SuGo Server', () => {
         res.status(status);
         res.json({});
       }).setLogger(dummyLogger);
-      const response = await chai.request(newServer).get(PATH);
-      response.should.have.status(status);
+      const response = await supertest(newServer).get(PATH);
+      response.status.should.be.eql(status);
     });
 
     it('should have the body sent to the json() method', async () => {
@@ -104,8 +99,8 @@ describe('SuGo Server', () => {
         res.status(status);
         res.json({ foo: 'fighters' });
       }).setLogger(dummyLogger);
-      const response = await chai.request(newServer).get(PATH);
-      response.should.have.status(status);
+      const response = await supertest(newServer).get(PATH);
+      response.status.should.be.eql(status);
       response.body.should.have.property('foo');
       response.body.foo.should.be.eql('fighters');
     });
@@ -118,7 +113,7 @@ describe('SuGo Server', () => {
       ).setLogger(dummyLogger);
       newServer.useMiddleware((req: SuGoRequest, res: SuGoResponse) => (req.first = true));
       newServer.useMiddleware((req: SuGoRequest, res: SuGoResponse) => (req.second = true));
-      const response = await chai.request(newServer).get(PATH);
+      const response = await supertest(newServer).get(PATH);
       response.body.should.have.property('first');
       response.body.first.should.be.eql(true);
       response.body.should.have.property('second');
@@ -132,7 +127,7 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new Error(errorMessage);
       }).setLogger(dummyLogger);
-      const response = await chai.request(newServer).get(PATH);
+      const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(500);
       response.body.name.should.be.eql('Error');
       response.body.message.should.be.eql(errorMessage);
@@ -143,7 +138,7 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new CustomError('New error');
       }).setLogger(dummyLogger);
-      const response = await chai.request(newServer).get(PATH);
+      const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql('CustomError');
       response.body.message.should.be.eql(errorMessage);
@@ -155,7 +150,7 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new CustomHandledError('New error');
       }).setLogger(dummyLogger);
-      const response = await chai.request(newServer).get(PATH);
+      const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql('CustomHandledError');
       response.body.message.should.be.eql(errorMessage);

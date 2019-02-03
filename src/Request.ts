@@ -1,5 +1,4 @@
 import * as http from 'http';
-import { Socket } from 'net';
 const IncomingMessage = http.IncomingMessage;
 import * as url from 'url';
 import * as util from 'util';
