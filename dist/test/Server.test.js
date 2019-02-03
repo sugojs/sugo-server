@@ -9,12 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const chai = require("chai");
+const superagent = require("superagent");
 const index_1 = require("../index");
-const PATH = "/foo";
-const headers = { "Content-Type": "application/json" };
-const chaiHttp = require("chai-http");
 const CustomError_1 = require("./CustomError");
 const CustomHandledError_1 = require("./CustomHandledError");
+const DummyLogger_1 = require("./DummyLogger");
+const dummyLogger = new DummyLogger_1.default();
+const PATH = "http://localhost:3000/foo";
+const headers = { "Content-Type": "application/json" };
 const HANDLER = (req, res) => {
     res.writeHead(200, headers);
     res.end(JSON.stringify({
@@ -28,21 +30,28 @@ const HANDLER = (req, res) => {
         res: { id: res.id, path: res.path, method: res.method }
     }));
 };
-chai.use(chaiHttp);
 chai.should();
 // Our parent block
 describe("SuGo Server", () => {
-    const server = index_1.createServer(HANDLER).setLogger(null);
+    const server = index_1.createServer(HANDLER).setLogger(dummyLogger);
+    before(() => {
+        server.listen(3000);
+    });
+    after(() => {
+        server.close();
+    });
     describe(`Request`, () => {
         it("The request id should be set", () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai
-                .request(server)
-                .post(PATH)
-                .send({ foo: "fighters" });
-            response.body.req.should.have.property("id");
+            try {
+                const response = yield superagent.post(PATH).send({ foo: "fighters" });
+                response.body.req.should.have.property("id");
+            }
+            catch (error) {
+                console.error(error);
+            }
         }));
         it("The request path should be set", () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai.request(server).get(PATH);
+            const response = yield superagent.get(PATH);
             response.body.req.should.have.property("path");
         }));
         it("The request body should be set if post data is sent", () => __awaiter(this, void 0, void 0, function* () {
@@ -74,12 +83,12 @@ describe("SuGo Server", () => {
             response.body.res.id.should.be.eql(response.body.req.id);
         }));
         it("The response path should be equal to the request path", () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai.request(server).get(PATH);
+            const response = yield superagent.get(PATH);
             response.body.res.should.have.property("path");
             response.body.res.path.should.be.eql(response.body.req.path);
         }));
         it("The response method should be equal to the request method", () => __awaiter(this, void 0, void 0, function* () {
-            const response = yield chai.request(server).get(PATH);
+            const response = yield superagent.get(PATH);
             response.body.res.should.have.property("method");
             response.body.res.method.should.be.eql(response.body.req.method);
         }));
@@ -88,7 +97,7 @@ describe("SuGo Server", () => {
             const newServer = index_1.createServer((req, res) => {
                 res.status(status);
                 res.end({});
-            }).setLogger(null);
+            }).setLogger(dummyLogger);
             const response = yield chai.request(newServer).get(PATH);
             response.should.have.status(status);
         }));
@@ -97,7 +106,7 @@ describe("SuGo Server", () => {
             const newServer = index_1.createServer((req, res) => {
                 res.status(status);
                 res.json({ foo: "fighters" });
-            }).setLogger(null);
+            }).setLogger(dummyLogger);
             const response = yield chai.request(newServer).get(PATH);
             response.should.have.status(status);
             response.body.should.have.property("foo");
@@ -106,7 +115,7 @@ describe("SuGo Server", () => {
     });
     describe(`Middleware`, () => {
         it("should run the added middleware", () => __awaiter(this, void 0, void 0, function* () {
-            const newServer = index_1.createServer((req, res) => res.json({ first: req.first, second: req.second })).setLogger(null);
+            const newServer = index_1.createServer((req, res) => res.json({ first: req.first, second: req.second })).setLogger(dummyLogger);
             server.useMiddleware((req, res) => (req.first = true));
             server.useMiddleware((req, res) => (req.second = true));
             const response = yield chai.request(newServer).get(PATH);
@@ -121,7 +130,7 @@ describe("SuGo Server", () => {
             const errorMessage = "New error";
             const newServer = index_1.createServer((req, res) => {
                 throw new Error(errorMessage);
-            }).setLogger(null);
+            }).setLogger(dummyLogger);
             const response = yield chai.request(newServer).get(PATH);
             response.status.should.be.eql(500);
             response.body.name.should.be.eql("Error");
@@ -131,7 +140,7 @@ describe("SuGo Server", () => {
             const errorMessage = "New error";
             const newServer = index_1.createServer((req, res) => {
                 throw new CustomError_1.default("New error");
-            }).setLogger(null);
+            }).setLogger(dummyLogger);
             const response = yield chai.request(newServer).get(PATH);
             response.status.should.be.eql(400);
             response.body.name.should.be.eql("CustomError");
@@ -142,7 +151,7 @@ describe("SuGo Server", () => {
             const errorMessage = "New error";
             const newServer = index_1.createServer((req, res) => {
                 throw new CustomHandledError_1.default("New error");
-            }).setLogger(null);
+            }).setLogger(dummyLogger);
             const response = yield chai.request(newServer).get(PATH);
             response.status.should.be.eql(400);
             response.body.name.should.be.eql("CustomHandledError");

@@ -73,5 +73,3 @@ export default class SuGoRequest extends IncomingMessage {
     });
   }
 }
-
-module.exports = SuGoRequest;

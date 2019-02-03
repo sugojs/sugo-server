@@ -17,16 +17,15 @@ export default class SuGoServer extends Server {
   public middleware: IHandler[] = [];
   public handleError: IErrorHandler;
 
-  constructor(requestHandler: IHandler, logger: ILogger = console) {
+  constructor(requestHandler: IHandler) {
     super({
       IncomingMessage: SuGoRequest,
       ServerResponse: SuGoResponse
-    });
+    } as any);
     assert(
       typeof requestHandler === "function",
       `The "requestHandler" must be a function. Value: ${requestHandler}`
     );
-
     const self = this;
     this.handleError = this.defaultErrorHandler;
     this.addListener("close", this.closeEventHandler)
@@ -104,4 +103,3 @@ export default class SuGoServer extends Server {
     return this;
   }
 }
-module.exports = SuGoServer;

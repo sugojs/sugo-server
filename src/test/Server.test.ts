@@ -1,14 +1,15 @@
 import * as chai from "chai";
+import chaiHttp = require("chai-http");
 import { createServer } from "../index";
-import SuGoServer from "../Server";
-const PATH = "/foo";
-const headers = { "Content-Type": "application/json" };
-import * as chaiHttp from "chai-http";
 import SuGoRequest from "../Request";
 import SuGoResponse from "../Response";
 import CustomError from "./CustomError";
 import CustomHandledError from "./CustomHandledError";
+import DummyLogger from "./DummyLogger";
 
+const PATH = "/foo";
+const headers = { "Content-Type": "application/json" };
+const dummyLogger = new DummyLogger();
 const HANDLER = (req: SuGoRequest, res: SuGoResponse) => {
   res.writeHead(200, headers);
   res.end(
@@ -29,7 +30,7 @@ chai.should();
 
 // Our parent block
 describe("SuGo Server", () => {
-  const server = createServer(HANDLER).setLogger(null);
+  const server = createServer(HANDLER).setLogger(dummyLogger);
   describe(`Request`, () => {
     it("The request id should be set", async () => {
       const response = await chai
@@ -91,8 +92,8 @@ describe("SuGo Server", () => {
       const status = 201;
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         res.status(status);
-        res.end({});
-      }).setLogger(null);
+        res.json({});
+      }).setLogger(dummyLogger);
       const response = await chai.request(newServer).get(PATH);
       response.should.have.status(status);
     });
@@ -102,7 +103,7 @@ describe("SuGo Server", () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         res.status(status);
         res.json({ foo: "fighters" });
-      }).setLogger(null);
+      }).setLogger(dummyLogger);
       const response = await chai.request(newServer).get(PATH);
       response.should.have.status(status);
       response.body.should.have.property("foo");
@@ -114,11 +115,11 @@ describe("SuGo Server", () => {
     it("should run the added middleware", async () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) =>
         res.json({ first: req.first, second: req.second })
-      ).setLogger(null);
-      server.useMiddleware(
+      ).setLogger(dummyLogger);
+      newServer.useMiddleware(
         (req: SuGoRequest, res: SuGoResponse) => (req.first = true)
       );
-      server.useMiddleware(
+      newServer.useMiddleware(
         (req: SuGoRequest, res: SuGoResponse) => (req.second = true)
       );
       const response = await chai.request(newServer).get(PATH);
@@ -134,7 +135,7 @@ describe("SuGo Server", () => {
       const errorMessage = "New error";
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new Error(errorMessage);
-      }).setLogger(null);
+      }).setLogger(dummyLogger);
       const response = await chai.request(newServer).get(PATH);
       response.status.should.be.eql(500);
       response.body.name.should.be.eql("Error");
@@ -145,7 +146,7 @@ describe("SuGo Server", () => {
       const errorMessage = "New error";
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new CustomError("New error");
-      }).setLogger(null);
+      }).setLogger(dummyLogger);
       const response = await chai.request(newServer).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql("CustomError");
@@ -157,7 +158,7 @@ describe("SuGo Server", () => {
       const errorMessage = "New error";
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new CustomHandledError("New error");
-      }).setLogger(null);
+      }).setLogger(dummyLogger);
       const response = await chai.request(newServer).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql("CustomHandledError");

@@ -75,4 +75,3 @@ class SuGoRequest extends IncomingMessage {
     }
 }
 exports.default = SuGoRequest;
-module.exports = SuGoRequest;

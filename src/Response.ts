@@ -74,5 +74,3 @@ export default class SuGoResponse extends ServerResponse {
     return super.end(data);
   }
 }
-
-module.exports = SuGoResponse;

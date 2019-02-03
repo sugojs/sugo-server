@@ -1,5 +1,6 @@
-import Server, { IHandler } from "./Server";
+import { IHandler } from "./Server";
+import SuGoServer from "./Server";
 export * from "./Request";
 export * from "./Response";
 export * from "./Server";
-export declare const createServer: (requestListener: IHandler) => Server;
+export declare const createServer: (requestListener: IHandler) => SuGoServer;
