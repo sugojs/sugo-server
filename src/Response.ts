@@ -70,7 +70,7 @@ export default class SuGoResponse extends ServerResponse {
     return super.write(data);
   }
 
-  public end(data: any) {
+  public end(data?: any) {
     this.body = data;
     return super.end(data);
   }
