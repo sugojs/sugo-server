@@ -17,3 +17,7 @@ export interface IError {
   stack: string;
   handle: (req: SuGoRequest, res: SuGoResponse) => void;
 }
+
+export interface IDynamicObject {
+  [key: string]: any;
+}

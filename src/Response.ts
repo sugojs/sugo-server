@@ -1,11 +1,7 @@
 import * as http from 'http';
-import { IError, ILogger } from './Interfaces';
+import { IDynamicObject, IError, ILogger } from './Interfaces';
 import SuGoRequest from './Request';
 const ServerResponse = http.ServerResponse;
-
-export interface IDynamicObject {
-  [key: string]: any;
-}
 
 export default class SuGoResponse extends ServerResponse {
   public body: IDynamicObject = {};

@@ -2,11 +2,7 @@ import * as http from 'http';
 const IncomingMessage = http.IncomingMessage;
 import * as url from 'url';
 import * as util from 'util';
-import { ILogger } from './Interfaces';
-
-export interface IDynamicObject {
-  [key: string]: any;
-}
+import { IDynamicObject, ILogger } from './Interfaces';
 
 export default class SuGoRequest extends IncomingMessage {
   public id = Math.random()
