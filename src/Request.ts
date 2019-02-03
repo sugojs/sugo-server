@@ -12,6 +12,7 @@ export default class SuGoRequest extends IncomingMessage {
   public rawBody = Buffer.from('', 'utf8');
   public path = '';
   public query: IDynamicObject = {};
+  public params: IDynamicObject = {};
   public logger: ILogger = console;
   public url = '';
   public pathname = '';
