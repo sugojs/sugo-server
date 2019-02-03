@@ -4,8 +4,8 @@ class CustomError extends Error {
     constructor() {
         super(...arguments);
         this.status = 400;
-        this.name = "CustomError";
-        this.code = "CustomError";
+        this.name = 'CustomError';
+        this.code = 'CustomError';
         this.extraData = true;
     }
 }

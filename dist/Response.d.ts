@@ -1,6 +1,6 @@
-import * as http from "http";
-import { IError, ILogger } from "./Interfaces";
-import SuGoRequest from "./Request";
+import * as http from 'http';
+import { IError, ILogger } from './Interfaces';
+import SuGoRequest from './Request';
 declare const ServerResponse: typeof http.ServerResponse;
 export default class SuGoResponse extends ServerResponse {
     body: {};

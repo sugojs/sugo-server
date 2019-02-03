@@ -19,13 +19,13 @@ class SuGoRequest extends IncomingMessage {
             .toString(36)
             .substr(2);
         this.body = {};
-        this.rawBody = Buffer.from("", "utf8");
-        this.path = "";
+        this.rawBody = Buffer.from('', 'utf8');
+        this.path = '';
         this.query = {};
         this.logger = console;
-        this.url = "";
-        this.pathname = "";
-        this.method = "";
+        this.url = '';
+        this.pathname = '';
+        this.method = '';
     }
     setId() {
         const id = Math.random()
@@ -40,17 +40,17 @@ class SuGoRequest extends IncomingMessage {
     }
     parseUrl() {
         const { pathname, query } = url.parse(this.url, true);
-        this.path = pathname ? pathname : "";
+        this.path = pathname ? pathname : '';
         this.query = query;
         return this;
     }
     log() {
-        let log = util.format("Request ID: ( %s ) %s: %s", this.id, this.method, this.url);
+        let log = util.format('Request ID: ( %s ) %s: %s', this.id, this.method, this.url);
         if (Object.keys(this.query).length > 0) {
-            log += util.format(" --> query %j", this.query);
+            log += util.format(' --> query %j', this.query);
         }
         if (Object.keys(this.body).length > 0) {
-            log += util.format(" --> body %j", this.body);
+            log += util.format(' --> body %j', this.body);
         }
         this.logger.info(log);
         return this;
@@ -58,13 +58,12 @@ class SuGoRequest extends IncomingMessage {
     getBody() {
         return __awaiter(this, void 0, void 0, function* () {
             const req = this;
-            return new Promise((resolve) => {
-                this.on("data", (data) => {
-                    const auxBuffer = Buffer.from(data, "utf8");
+            return new Promise(resolve => {
+                this.on('data', data => {
+                    const auxBuffer = Buffer.from(data, 'utf8');
                     req.rawBody = Buffer.concat([req.rawBody, auxBuffer]);
-                }).on("end", () => {
-                    req.body =
-                        req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
+                }).on('end', () => {
+                    req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
                     if (this.logger) {
                         req.log();
                     }

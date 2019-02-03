@@ -1,8 +1,8 @@
-import * as http from "http";
+import * as http from 'http';
 declare const Server: typeof http.Server;
-import { IError, ILogger } from "./Interfaces";
-import SuGoRequest from "./Request";
-import SuGoResponse from "./Response";
+import { IError, ILogger } from './Interfaces';
+import SuGoRequest from './Request';
+import SuGoResponse from './Response';
 export declare type IHandler = (req: SuGoRequest, res: SuGoResponse) => void;
 export declare type IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IError) => void;
 export default class SuGoServer extends Server {

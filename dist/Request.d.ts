@@ -1,6 +1,6 @@
-import * as http from "http";
+import * as http from 'http';
 declare const IncomingMessage: typeof http.IncomingMessage;
-import { ILogger } from "./Interfaces";
+import { ILogger } from './Interfaces';
 export default class SuGoRequest extends IncomingMessage {
     id: string;
     body: {};

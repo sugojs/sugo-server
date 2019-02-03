@@ -4,8 +4,8 @@ const CustomError_1 = require("./CustomError");
 class CustomHandledError extends CustomError_1.default {
     constructor() {
         super(...arguments);
-        this.name = "CustomHandledError";
-        this.code = "CustomHandledError";
+        this.name = 'CustomHandledError';
+        this.code = 'CustomHandledError';
     }
     handle(req, res) {
         const json = {
@@ -13,7 +13,7 @@ class CustomHandledError extends CustomError_1.default {
             extraData: this.extraData,
             message: this.message,
             name: this.constructor.name,
-            status: this.status
+            status: this.status,
         };
         res.status(json.status).json(json);
     }

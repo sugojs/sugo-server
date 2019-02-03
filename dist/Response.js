@@ -7,24 +7,24 @@ class SuGoResponse extends ServerResponse {
         super(req);
         this.body = {};
         this.logger = console;
-        this.id = "";
-        this.method = "";
-        this.path = "";
-        this.on("close", this.closeEventHandler);
-        this.on("error", this.errorEventHandler);
-        this.on("finish", this.finishEventHandler);
+        this.id = '';
+        this.method = '';
+        this.path = '';
+        this.on('close', this.closeEventHandler);
+        this.on('error', this.errorEventHandler);
+        this.on('finish', this.finishEventHandler);
     }
     setLogger(logger) {
         this.logger = logger;
     }
     closeEventHandler() {
         if (this.logger) {
-            this.logger.error("CLOSE EVENT");
+            this.logger.error('CLOSE EVENT');
         }
     }
     errorEventHandler(err) {
         if (this.logger) {
-            this.logger.error("Response ERROR EVENT --> err", JSON.stringify(err));
+            this.logger.error('Response ERROR EVENT --> err', JSON.stringify(err));
         }
     }
     finishEventHandler() {
@@ -49,7 +49,7 @@ class SuGoResponse extends ServerResponse {
         return this;
     }
     json(data) {
-        this.setHeader("Content-Type", "application/json");
+        this.setHeader('Content-Type', 'application/json');
         this.end(JSON.stringify(data));
         return this;
     }

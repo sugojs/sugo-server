@@ -1,5 +1,5 @@
-import SuGoRequest from "./Request";
-import SuGoResponse from "./Response";
+import SuGoRequest from './Request';
+import SuGoResponse from './Response';
 export interface ILogger {
     log(...messages: string[]): void;
     info(...messages: string[]): void;
