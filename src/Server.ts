@@ -1,16 +1,12 @@
-import * as http from "http";
+import * as http from 'http';
 const Server = http.Server;
-import * as assert from "assert";
-import { IError, ILogger } from "./Interfaces";
-import SuGoRequest from "./Request";
-import SuGoResponse from "./Response";
+import * as assert from 'assert';
+import { IError, ILogger } from './Interfaces';
+import SuGoRequest from './Request';
+import SuGoResponse from './Response';
 
 export type IHandler = (req: SuGoRequest, res: SuGoResponse) => void;
-export type IErrorHandler = (
-  req: SuGoRequest,
-  res: SuGoResponse,
-  err: IError
-) => void;
+export type IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IError) => void;
 
 export default class SuGoServer extends Server {
   public logger: ILogger = console;
@@ -20,18 +16,15 @@ export default class SuGoServer extends Server {
   constructor(requestHandler: IHandler) {
     super({
       IncomingMessage: SuGoRequest,
-      ServerResponse: SuGoResponse
+      ServerResponse: SuGoResponse,
     } as any);
-    assert(
-      typeof requestHandler === "function",
-      `The "requestHandler" must be a function. Value: ${requestHandler}`
-    );
+    assert(typeof requestHandler === 'function', `The "requestHandler" must be a function. Value: ${requestHandler}`);
     const self = this;
     this.handleError = this.defaultErrorHandler;
-    this.addListener("close", this.closeEventHandler)
-      .addListener("error", this.errorEventHandler)
-      .addListener("listening", this.listeningEventHandler)
-      .addListener("request", async (req: SuGoRequest, res: SuGoResponse) => {
+    this.addListener('close', this.closeEventHandler)
+      .addListener('error', this.errorEventHandler)
+      .addListener('listening', this.listeningEventHandler)
+      .addListener('request', async (req: SuGoRequest, res: SuGoResponse) => {
         try {
           req.setLogger(self.logger).parseUrl();
           res.setLogger(self.logger);
@@ -51,15 +44,13 @@ export default class SuGoServer extends Server {
 
   public closeEventHandler() {
     if (this.logger) {
-      this.logger.log("The connection has been closed!");
+      this.logger.log('The connection has been closed!');
     }
   }
 
   public errorEventHandler(err: IError) {
     if (this.logger) {
-      this.logger.error(
-        `An error has ocurred --> ${err.name} ${err.message} ${err.stack}`
-      );
+      this.logger.error(`An error has ocurred --> ${err.name} ${err.message} ${err.stack}`);
     }
   }
 
@@ -76,15 +67,15 @@ export default class SuGoServer extends Server {
 
   public defaultErrorHandler(req: SuGoRequest, res: SuGoResponse, err: IError) {
     /* If the error object has a handle method we use it */
-    if (typeof err.handle === "function") {
+    if (typeof err.handle === 'function') {
       err.handle(req, res);
     } else {
       const json = {
-        code: err.code || "N/A",
-        message: err.message || "Unexpected Error",
+        code: err.code || 'N/A',
+        message: err.message || 'Unexpected Error',
         name: err.name || err.constructor.name,
-        stack: "",
-        status: err.status || 500
+        stack: '',
+        status: err.status || 500,
       };
       if (err.stack) {
         json.stack = err.stack;

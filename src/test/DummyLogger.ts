@@ -1,4 +1,4 @@
-import { ILogger } from "../Interfaces";
+import { ILogger } from '../Interfaces';
 
 export default class DummyLogger implements ILogger {
   public log(message: string) {
