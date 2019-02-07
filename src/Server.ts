@@ -6,8 +6,9 @@ import { IError, ILogger } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
 
-export type IHandler = (req: SuGoRequest, res: SuGoResponse) => void;
-export type IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IError) => void;
+export type IHandler = (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => any;
+export type IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IError) => any;
+export type INextFunction = () => any;
 export * from './Interfaces';
 
 export default class SuGoServer extends Server {
@@ -34,10 +35,16 @@ export default class SuGoServer extends Server {
           res.path = req.path;
           res.method = req.method;
           await req.getBody(); // Adds body property to request
-          for (const fn of self.middleware) {
-            await fn(req, res);
-          }
-          await requestHandler(req, res); // User custom request Handler
+          let idx = 0;
+
+          const next: INextFunction = async (): Promise<void> => {
+            if (idx >= this.middleware.length) {
+              return await requestHandler(req, res);
+            }
+            const layer = this.middleware[idx++];
+            await layer(req, res, next);
+          };
+          await next();
         } catch (err) {
           self.handleError(req, res, err);
         }
@@ -91,7 +98,7 @@ export default class SuGoServer extends Server {
     return this;
   }
 
-  public setErrorHandler(fn: IHandler) {
+  public setErrorHandler(fn: IErrorHandler) {
     this.handleError = fn;
     return this;
   }

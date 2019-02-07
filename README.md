@@ -20,10 +20,7 @@ All this is implemented on a Server class that can be subclassed in order to ext
 
 ## **Options**
 
-- **@param {\*} logger:** Any object with the usual logging methods (log, debug, info, error)
-- **@param {\*} [httpServerOptions={}]**
-- **@param {\*} [httpServerOptions.IncomingMessage=SuGoRequest]:** NodeJS Http incoming message subclass
-- **@param {\*} [httpServerOptions.ServerResponse=SuGoResponse]:** NodeJS Http Server response subclass
+- **@param {\*} requestHandler:** The NodeJS request handler
 
 ## **Requirements**
 
@@ -39,40 +36,48 @@ npm install --save @sugo/server
 
 A server can be created using the new Server() constructor, but it is recommended to use the createServer method unless you have the need to use new Server().
 
-```javascript
-const server = createServer((req, res) =>
-  res.status(200).json({ first: req.first, second: req.second })
+```typescript
+import { createServer, SuGoRequest, SuGoResponse, INextFunction } from '@sugo/server';
+const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
+  res.status(200).json({ first: req.first, second: req.second }),
 );
-server.useMiddleware((req, res) => (req.foo = "fighters"));
 ```
 
 ## **Router Middleware**
 
-Middleware can be added for the whole server using the useMiddleware method. Any middleware added, will be executed before each request
+Middleware can be added for the whole server using the useMiddleware method. The middleware stack will start before the request handler, but the sequence be defined by the use of the next() function. This function calls the next function in the stack. **Next is an async function**.
 
-```javascript
-const server = createServer((req, res) =>
-  res.status(200).json({ first: req.first, second: req.second })
+```typescript
+import { createServer, SuGoRequest, SuGoResponse, INextFunction } from '@sugo/server';
+
+const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
+  res.status(200).json({ first: req.first, second: req.second }),
 );
-server.useMiddleware((req, res) => (req.foo = "fighters"));
+server.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+  req.foo = 'fighters';
+  if (next) {
+    await next();
+  }
+});
 ```
 
 ## **Error handling**
 
 The server uses the following default handler:
 
-```javascript
+```typescript
 class SuGoServer extends Server {
-  defaultErrorHandler(req, res, err) {
+  public defaultErrorHandler(req: SuGoRequest, res: SuGoResponse, err: IError) {
     /* If the error object has a handle method we use it */
-    if (typeof err.handle === "function") {
+    if (typeof err.handle === 'function') {
       err.handle(req, res);
     } else {
       const json = {
-        status: err.status || 500,
+        code: err.code || 'N/A',
+        message: err.message || 'Unexpected Error',
         name: err.name || err.constructor.name,
-        code: err.code || "N/A",
-        message: err.message || "Unexpected Error"
+        stack: '',
+        status: err.status || 500,
       };
       if (err.stack) {
         json.stack = err.stack;
@@ -89,9 +94,10 @@ The idea behind this handler is to give custom exceptions the power to define ho
 
 The server can receive any object with the common logger methods (log, info, error, warn, debug). It will use a console logger by default. It can be set with the set Logger method.
 
-```javascript
-const server = createServer((req, res) =>
-  res.status(200).json({ first: req.first, second: req.second })
+```typescript
+import { createServer, SuGoRequest, SuGoResponse } from '@sugo/server';
+const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
+  res.status(200).json({ first: req.first, second: req.second }),
 ).setLogger(customLogger);
 ```
 
@@ -102,10 +108,11 @@ The logger can be accesed via req.logger, res.logger or server.logger.
 - res.json(data): Sets the response type to JSON and sends an JSON object.
 - res.status(status): Sets the status for the response
 
-```javascript
+```typescript
+import { createServer, SuGoRequest, SuGoResponse } from '@sugo/server';
 const server = createServer(
-  (req, res) => res.status(200).json({ first: req.first, second: req.second }),
-  customLogger
+  (req: SuGoRequest, res: SuGoResponse) => res.status(200).json({ first: req.first, second: req.second }),
+  customLogger,
 );
 ```
 
@@ -122,24 +129,23 @@ For loggind purposes, we copy the id, path and method properties from the reques
 
 ## **Complete Application Example**
 
-```javascript
-const { createServer } = require("@sugo/server");
-const Router = require("@sugo/router");
-const cors = require("cors");
+```typescript
+import { createServer, SuGoRequest, SuGoResponse } from '@sugo/server';
+import { Router } from '@sugo/router';
+import * as cors from 'cors';
 
 const router = new Router();
-router.get("/foo", (req, res) => res.end(JSON.stringify({ foo: req.foo })));
+router.get('/foo', (req: SuGoRequest, res: SuGoResponse) => res.end(JSON.stringify({ foo: req.foo })));
 
 // createServer is
-const server = createServer(req, res) => {
-  if (!router.match(req.method, res.url))
-    throw {
-      name: "ResourceNotFound",
-      message: "Resource not found",
-      status: 404
-    };
-  await router.handle(req, res);
-});
+const server = createServer(async (req: SuGoRequest, res: SuGoResponse) => await router.handle(req, res));
 
-server.useMiddleware(cors());
+server.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Max-Age', 2592000);
+  if (next) {
+    await next();
+  }
+});
 ```

@@ -9,33 +9,10 @@
       "request": "launch",
       "name": "Mocha All",
       "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": [
-        "-r",
-        "ts-node/register",
-        "--timeout",
-        "999999",
-        "--colors",
-        "${workspaceFolder}/src/test/*.test.ts"
-      ],
-      "console": "integratedTerminal",
+      "args": ["-r", "ts-node/register", "--timeout", "999999", "--colors", "${workspaceFolder}/src/test/*.test.ts"],
+      "console": "internalConsole",
       "internalConsoleOptions": "neverOpen",
       "protocol": "inspector"
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Launch via NPM",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "test"],
-      "port": 9229
-    },
-    {
-      "type": "node",
-      "request": "launch",
-      "name": "Mocha Tests",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
-      "args": ["${workspaceFolder}/test"],
-      "internalConsoleOptions": "openOnSessionStart"
     }
   ]
 }

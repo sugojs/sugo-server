@@ -1,8 +1,10 @@
 import * as chai from 'chai';
+import * as cors from 'cors';
 import * as supertest from 'supertest';
 import { createServer } from '../index';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
+import { INextFunction } from '../Server';
 import CustomError from './CustomError';
 import CustomHandledError from './CustomHandledError';
 import DummyLogger from './DummyLogger';
@@ -111,13 +113,60 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) =>
         res.json({ first: req.first, second: req.second }),
       ).setLogger(dummyLogger);
-      newServer.useMiddleware((req: SuGoRequest, res: SuGoResponse) => (req.first = true));
-      newServer.useMiddleware((req: SuGoRequest, res: SuGoResponse) => (req.second = true));
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+        req.first = true;
+        if (next) {
+          await next();
+        }
+      });
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+        req.second = true;
+        if (next) {
+          await next();
+        }
+      });
       const response = await supertest(newServer).get(PATH);
       response.body.should.have.property('first');
       response.body.first.should.be.eql(true);
       response.body.should.have.property('second');
       response.body.second.should.be.eql(true);
+    });
+
+    it('should handle the route and then continue the middleware', async () => {
+      const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
+        req.handlerPassed = true;
+        res.json({});
+      }).setLogger(dummyLogger);
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+        req.handlerPassed = false;
+        req.middlewarePassed = false;
+        if (next) {
+          await next();
+        }
+        req.handlerPassed.should.be.eql(true);
+        req.middlewarePassed.should.be.eql(true);
+      });
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+        req.middlewarePassed = true;
+        if (next) {
+          await next();
+        }
+      });
+      const response = await supertest(newServer).get(PATH);
+      response.status.should.have.be.eql(200);
+    });
+
+    it('should handle the middleware errors', async () => {
+      const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
+        req.handlerPassed = true;
+        res.json({});
+      }).setLogger(dummyLogger);
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+        throw new Error('MiddlewareError');
+      });
+      const response = await supertest(newServer).get(PATH);
+      response.status.should.have.be.eql(500);
+      response.body.message.should.be.eql('MiddlewareError');
     });
   });
 
