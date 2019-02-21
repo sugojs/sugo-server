@@ -11,7 +11,7 @@ export type IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IError) =
 export type INextFunction = () => any;
 export * from './Interfaces';
 
-export default class SuGoServer extends Server {
+export class SuGoServer extends Server {
   public logger: ILogger = console;
   public middleware: IHandler[] = [];
   public handleError: IErrorHandler;
@@ -103,3 +103,5 @@ export default class SuGoServer extends Server {
     return this;
   }
 }
+
+export default SuGoServer;

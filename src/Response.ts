@@ -3,7 +3,7 @@ import { IDynamicObject, IError, ILogger } from './Interfaces';
 import SuGoRequest from './Request';
 const ServerResponse = http.ServerResponse;
 
-export default class SuGoResponse extends ServerResponse {
+export class SuGoResponse extends ServerResponse {
   public body: IDynamicObject = {};
   public logger: ILogger = console;
   public id = '';
@@ -75,3 +75,5 @@ export default class SuGoResponse extends ServerResponse {
     return super.end(data);
   }
 }
+
+export default SuGoResponse;

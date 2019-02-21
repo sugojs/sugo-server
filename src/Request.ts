@@ -5,7 +5,7 @@ import * as url from 'url';
 import * as util from 'util';
 import { IDynamicObject, ILogger } from './Interfaces';
 
-export default class SuGoRequest extends IncomingMessage {
+export class SuGoRequest extends IncomingMessage {
   public id = Math.random()
     .toString(36)
     .substr(2);
@@ -69,3 +69,5 @@ export default class SuGoRequest extends IncomingMessage {
     });
   }
 }
+
+export default SuGoRequest;
