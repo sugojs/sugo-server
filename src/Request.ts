@@ -1,6 +1,6 @@
 import * as http from 'http';
 const IncomingMessage = http.IncomingMessage;
-import { normalize } from 'path';
+import { posix } from 'path';
 import * as url from 'url';
 import * as util from 'util';
 import { IDynamicObject, ILogger } from './Interfaces';
@@ -34,7 +34,7 @@ export class SuGoRequest extends IncomingMessage {
   }
 
   public parseUrl(): SuGoRequest {
-    const normalizedUrl = normalize(this.url);
+    const normalizedUrl = posix.normalize(this.url);
     const { pathname, query } = url.parse(normalizedUrl, true);
     this.path = pathname ? pathname : '';
     this.query = query;
