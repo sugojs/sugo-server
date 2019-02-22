@@ -3,7 +3,8 @@ const IncomingMessage = http.IncomingMessage;
 import { posix } from 'path';
 import * as url from 'url';
 import * as util from 'util';
-import { IDynamicObject, ILogger } from './Interfaces';
+import { ILogger, ILogginBehavior, LogginBehavior } from './Behaviors/Logging';
+import { IDynamicObject } from './Interfaces';
 
 export class SuGoRequest extends IncomingMessage {
   public id = Math.random()
@@ -14,7 +15,7 @@ export class SuGoRequest extends IncomingMessage {
   public path = '';
   public query: IDynamicObject = {};
   public params: IDynamicObject = {};
-  public logger: ILogger = console;
+  public loggingBehavior: ILogginBehavior = new LogginBehavior();
   public url = '';
   public pathname = '';
   public method = '';
@@ -28,8 +29,12 @@ export class SuGoRequest extends IncomingMessage {
     return this;
   }
 
-  public setLogger(logger: ILogger): SuGoRequest {
-    this.logger = logger;
+  public get logger() {
+    return this.loggingBehavior.logger;
+  }
+
+  public setLogger(logger: ILogger) {
+    this.loggingBehavior.setLogger(logger);
     return this;
   }
 

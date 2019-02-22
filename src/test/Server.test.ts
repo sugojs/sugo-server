@@ -1,10 +1,10 @@
 import * as chai from 'chai';
 import * as cors from 'cors';
 import * as supertest from 'supertest';
+import { INextFunction } from '../Behaviors/Middleware';
 import { createServer } from '../index';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
-import { INextFunction } from '../Server';
 import CustomError from './CustomError';
 import CustomHandledError from './CustomHandledError';
 import DummyLogger from './DummyLogger';

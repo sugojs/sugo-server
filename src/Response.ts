@@ -1,11 +1,13 @@
 import * as http from 'http';
-import { IDynamicObject, IError, ILogger } from './Interfaces';
+import { IError } from './Behaviors/ErrorHandling';
+import { ILogger, ILogginBehavior, LogginBehavior } from './Behaviors/Logging';
+import { IDynamicObject } from './Interfaces';
 import SuGoRequest from './Request';
 const ServerResponse = http.ServerResponse;
 
 export class SuGoResponse extends ServerResponse {
   public body: IDynamicObject = {};
-  public logger: ILogger = console;
+  public loggingBehavior: ILogginBehavior = new LogginBehavior();
   public id = '';
   public method = '';
   public path = '';
@@ -18,8 +20,13 @@ export class SuGoResponse extends ServerResponse {
     this.on('finish', this.finishEventHandler);
   }
 
+  public get logger() {
+    return this.loggingBehavior.logger;
+  }
+
   public setLogger(logger: ILogger) {
-    this.logger = logger;
+    this.loggingBehavior.setLogger(logger);
+    return this;
   }
 
   public closeEventHandler() {
