@@ -22,6 +22,13 @@ All this is implemented on a Server class that can be subclassed in order to ext
 
 - **@param {\*} requestHandler:** The NodeJS request handler
 
+# **SuGoSecureServer**
+
+## **Options**
+
+- **@param {\*} requestHandler:** The NodeJS request handler
+- **@param {\*} options:** The NodeJS https options
+
 ## **Requirements**
 
 node version >= 9.11.2
@@ -40,6 +47,21 @@ A server can be created using the new Server() constructor, but it is recommende
 import { createServer, SuGoRequest, SuGoResponse, INextFunction } from '@sugo/server';
 const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
   res.status(200).json({ first: req.first, second: req.second }),
+);
+```
+
+## **Creating a Https Server**
+
+A server can be created using the new Server() constructor, but it is recommended to use the createServer method unless you have the need to use new Server().
+
+```typescript
+import { createServer, SuGoRequest, SuGoResponse, INextFunction } from '@sugo/server';
+const server = createSecureServer(
+  (req: SuGoRequest, res: SuGoResponse) => res.status(200).json({ first: req.first, second: req.second }),
+  {
+    cert: fs.readFileSync(path.resolve(__dirname, 'server.cert')),
+    key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
+  },
 );
 ```
 
