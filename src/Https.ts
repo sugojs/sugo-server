@@ -3,9 +3,9 @@ import { Server, ServerOptions } from 'https';
 import { ErrorHandlingBehavior, IError, IErrorHandler, IErrorHandlingBehavior } from './Behaviors/ErrorHandling';
 import { ILogger, ILogginBehavior, LogginBehavior } from './Behaviors/Logging';
 import { IMiddlewareBehavior, INextFunction, MiddlewareBehavior } from './Behaviors/Middleware';
+import { IHandler } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
-import { IHandler } from './Interfaces';
 
 export * from './Interfaces';
 

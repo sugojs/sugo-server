@@ -1,6 +1,6 @@
+import { IHandler } from '../Interfaces';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
-import { IHandler } from '../Interfaces';
 
 export type INextFunction = () => any;
 
