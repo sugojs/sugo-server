@@ -5,8 +5,7 @@ import { ILogger, ILogginBehavior, LogginBehavior } from './Behaviors/Logging';
 import { IMiddlewareBehavior, INextFunction, MiddlewareBehavior } from './Behaviors/Middleware';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
-
-export type IHandler = (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => any;
+import { IHandler } from './Interfaces';
 
 export * from './Interfaces';
 

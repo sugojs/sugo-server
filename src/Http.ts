@@ -4,12 +4,9 @@ import * as assert from 'assert';
 import { ErrorHandlingBehavior, IError, IErrorHandler, IErrorHandlingBehavior } from './Behaviors/ErrorHandling';
 import { ILogger, ILogginBehavior, LogginBehavior } from './Behaviors/Logging';
 import { IMiddlewareBehavior, INextFunction, MiddlewareBehavior } from './Behaviors/Middleware';
+import { IHandler } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
-
-export type IHandler = (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => any;
-
-export * from './Interfaces';
 
 export class SuGoServer extends Server {
   public loggingBehavior: ILogginBehavior = new LogginBehavior();
