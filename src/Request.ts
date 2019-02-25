@@ -10,7 +10,7 @@ export class SuGoRequest extends IncomingMessage {
   public id = Math.random()
     .toString(36)
     .substr(2);
-  public body: IDynamicObject | string = {};
+  public body: any;
   public rawBody = Buffer.from('', 'utf8');
   public path = '';
   public query: IDynamicObject = {};
