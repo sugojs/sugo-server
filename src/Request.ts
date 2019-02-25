@@ -68,7 +68,7 @@ export class SuGoRequest extends IncomingMessage {
         try {
           req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
         } catch (error) {
-          req.body = req.rawBody;
+          req.body = req.rawBody.toString();
         }
         req.log();
         resolve(req.body);
