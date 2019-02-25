@@ -10,7 +10,7 @@ export class SuGoRequest extends IncomingMessage {
   public id = Math.random()
     .toString(36)
     .substr(2);
-  public body: IDynamicObject = {};
+  public body: IDynamicObject | string = {};
   public rawBody = Buffer.from('', 'utf8');
   public path = '';
   public query: IDynamicObject = {};
@@ -65,10 +65,12 @@ export class SuGoRequest extends IncomingMessage {
         const auxBuffer = Buffer.from(data, 'utf8');
         req.rawBody = Buffer.concat([req.rawBody, auxBuffer]);
       }).on('end', () => {
-        req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
-        if (this.logger) {
-          req.log();
+        try {
+          req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
+        } catch (error) {
+          req.body = req.rawBody;
         }
+        req.log();
         resolve(req.body);
       });
     });
