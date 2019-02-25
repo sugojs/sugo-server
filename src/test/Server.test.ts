@@ -1,5 +1,6 @@
 import * as chai from 'chai';
 import * as cors from 'cors';
+import * as path from 'path';
 import * as supertest from 'supertest';
 import { INextFunction } from '../Behaviors/Middleware';
 import { createServer } from '../index';
@@ -69,6 +70,13 @@ describe('SuGo Server', () => {
         .send('Hello world');
       response.body.req.should.have.property('body');
       response.body.req.body.should.be.eql('Hello world');
+    });
+
+    it('should accept a file attachtment', async () => {
+      const response = await supertest(server)
+        .get(PATH)
+        .attach('attachment', path.resolve(__dirname, 'server.key'))
+      response.body.req.should.have.property('body');
     });
   });
 
