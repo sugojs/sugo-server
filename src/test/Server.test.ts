@@ -62,6 +62,14 @@ describe('SuGo Server', () => {
       response.body.req.query.should.have.property('foo');
       response.body.req.query.foo.should.be.eql('fighters');
     });
+
+    it('should accept string body', async () => {
+      const response = await supertest(server)
+        .get(PATH)
+        .send('Hello world');
+      response.body.req.should.have.property('body');
+      response.body.req.body.should.be.eql('Hello world');
+    });
   });
 
   describe(`SuGoResponse`, () => {
