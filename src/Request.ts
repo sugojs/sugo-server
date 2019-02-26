@@ -5,6 +5,7 @@ import * as url from 'url';
 import * as util from 'util';
 import { ILogger, ILogginBehavior, LogginBehavior } from './Behaviors/Logging';
 import { IDynamicObject } from './Interfaces';
+import { IncomingForm } from 'formidable';
 
 export class SuGoRequest extends IncomingMessage {
   public id = Math.random()
@@ -60,18 +61,40 @@ export class SuGoRequest extends IncomingMessage {
 
   public async getBody() {
     const req = this;
+    if (this.headers['content-type'] && this.headers['content-type'].includes('multipart/form-data')) {
+      return await this.parseFiles();
+    } else {
+      return await this.getJsonBody();
+    }
+  }
+
+  public async getJsonBody() {
+    const req = this;
     return new Promise(resolve => {
       this.on('data', data => {
         const auxBuffer = Buffer.from(data, 'utf8');
         req.rawBody = Buffer.concat([req.rawBody, auxBuffer]);
       }).on('end', () => {
-        try {
-          req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
-        } catch (error) {
-          req.body = req.rawBody.toString();
+        req.body = req.rawBody.length > 0 ? JSON.parse(req.rawBody.toString()) : {};
+        if (this.logger) {
+          req.log();
         }
-        req.log();
         resolve(req.body);
+      });
+    });
+  }
+
+  public async parseFiles() {
+    const req = this;
+    const form = new IncomingForm();
+    return new Promise((resolve, reject) => {
+      form.parse(req, (error, fields, files) => {
+        if (error) {
+          reject(error);
+        }
+        req.fields = fields;
+        req.files = files;
+        resolve({ fields, files });
       });
     });
   }
