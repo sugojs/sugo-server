@@ -90,6 +90,8 @@ export class SuGoRequest extends IncomingMessage {
   public async parseFiles() {
     const req = this;
     const form = new IncomingForm();
+    form.hash = 'md5';
+    form.keepExtensions = true;
     return await new Promise((resolve, reject) => {
       form.parse(req, (error: any, fields: Fields, files: Files) => {
         if (error) {
