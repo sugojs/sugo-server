@@ -19,8 +19,8 @@ const HANDLER = (req: SuGoRequest, res: SuGoResponse) => {
     JSON.stringify({
       req: {
         body: req.body,
-        id: req.id,
         files: req.files,
+        id: req.id,
         method: req.method,
         path: req.path,
         query: req.query,
@@ -66,16 +66,12 @@ describe('SuGo Server', () => {
     });
 
     it('should accept string body', async () => {
-      try {
-        const response = await supertest(server)
-          .get(PATH)
-          .type('text/plain')
-          .send('Hello world');
-        response.body.req.should.have.property('body');
-        response.body.req.body.should.be.eql('Hello world');
-      } catch (error) {
-        console.error(error);
-      }
+      const response = await supertest(server)
+        .get(PATH)
+        .type('text/plain')
+        .send('Hello world');
+      response.body.req.should.have.property('body');
+      response.body.req.body.should.be.eql('Hello world');
     });
 
     it('should accept a file attachtment', async () => {
