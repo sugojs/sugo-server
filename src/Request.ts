@@ -1,6 +1,6 @@
 import * as http from 'http';
 const IncomingMessage = http.IncomingMessage;
-import { IncomingForm } from 'formidable';
+import { IncomingForm, Fields, Files } from 'formidable';
 import { posix } from 'path';
 import * as url from 'url';
 import * as util from 'util';
@@ -91,7 +91,7 @@ export class SuGoRequest extends IncomingMessage {
     const req = this;
     const form = new IncomingForm();
     return await new Promise((resolve, reject) => {
-      form.parse(req, (error, fields, files) => {
+      form.parse(req, (error:any, fields:Fields, files:Files) => {
         if (error) {
           reject(error);
         }
