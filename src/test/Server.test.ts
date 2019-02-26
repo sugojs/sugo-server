@@ -20,6 +20,7 @@ const HANDLER = (req: SuGoRequest, res: SuGoResponse) => {
       req: {
         body: req.body,
         id: req.id,
+        files: req.files,
         method: req.method,
         path: req.path,
         query: req.query,
@@ -65,18 +66,39 @@ describe('SuGo Server', () => {
     });
 
     it('should accept string body', async () => {
-      const response = await supertest(server)
-        .get(PATH)
-        .send('Hello world');
-      response.body.req.should.have.property('body');
-      response.body.req.body.should.be.eql('Hello world');
+      try {
+        const response = await supertest(server)
+          .get(PATH)
+          .type('text/plain')
+          .send('Hello world');
+        response.body.req.should.have.property('body');
+        response.body.req.body.should.be.eql('Hello world');
+      } catch (error) {
+        console.error(error);
+      }
     });
 
     it('should accept a file attachtment', async () => {
       const response = await supertest(server)
         .get(PATH)
+        .attach('attachment', path.resolve(__dirname, 'server.key'));
+      response.body.req.should.have.property('files');
+    });
+
+    it('should accept form-data fields', async () => {
+      const response = await supertest(server)
+        .get(PATH)
+        .field('api_key', 'hello world');
+      response.body.req.should.have.property('files');
+    });
+
+    it('should accept form-data fields and multiple files', async () => {
+      const response = await supertest(server)
+        .get(PATH)
+        .field('api_key', 'hello world')
         .attach('attachment', path.resolve(__dirname, 'server.key'))
-      response.body.req.should.have.property('body');
+        .attach('attachment', path.resolve(__dirname, 'server.cert'));
+      response.body.req.should.have.property('files');
     });
   });
 
