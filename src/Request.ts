@@ -3,7 +3,7 @@ const IncomingMessage = http.IncomingMessage;
 import { IDynamicObject } from './Interfaces';
 
 export class SuGoRequest extends IncomingMessage {
-  public id = Math.random()
+  public id?: string = Math.random()
     .toString(36)
     .substr(2);
   public body?: any = {};
