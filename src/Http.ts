@@ -1,6 +1,7 @@
 import * as http from 'http';
 const Server = http.Server;
 import * as assert from 'assert';
+import { parse } from 'url';
 import { ErrorHandlingBehavior, IError, IErrorHandler, IErrorHandlingBehavior } from './Behaviors/ErrorHandling';
 import { IMiddlewareBehavior, MiddlewareBehavior } from './Behaviors/Middleware';
 import { IHandler } from './Interfaces';
@@ -20,6 +21,9 @@ export class SuGoServer extends Server {
     const self = this;
     this.addListener('request', async (req: SuGoRequest, res: SuGoResponse) => {
       try {
+        const { path, query } = parse(req.url as string, true);
+        req.path = path;
+        req.query = query;
         res.id = req.id;
         res.url = req.url;
         res.method = req.method;

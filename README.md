@@ -7,8 +7,6 @@ Router agnostic. It is recommended to use with [@sugo/router](https://www.npmjs.
 The server implements:
 
 - Request body extraction
-- Request Logging
-- Response Logging
 - Server middleware
 - URL parsing
 - Express-style Response Helper methods (status, json)
@@ -65,7 +63,7 @@ const server = createSecureServer(
 );
 ```
 
-## **Router Middleware**
+## **Middleware**
 
 Middleware can be added for the whole server using the useMiddleware method. The middleware stack will start before the request handler, but the sequence be defined by the use of the next() function. This function calls the next function in the stack. **Next is an async function**.
 
@@ -112,18 +110,48 @@ class SuGoServer extends Server {
 
 The idea behind this handler is to give custom exceptions the power to define how should they be handled. This can be useful if the exception has custom data. If this error handler does not fufill your needs, it can be replaced with the server.setErrorHandler method that receives a function with the same signature.
 
+## **Request body extraction**
+
+To keep the modularity of the sugo modules and give our users more freedom, the body extraction must be handled with middleware. SuGoJS has the following middleware available:
+
+- [json](https://github.com/franciscosucre/sugo-body-parser-json)
+- [form-data, multipart and www-form-urlencoded](https://github.com/franciscosucre/sugo-body-parser-form-data-multipart)
+
 ## **Logging**
 
-The server can receive any object with the common logger methods (log, info, error, warn, debug). It will use a console logger by default. It can be set with the set Logger method.
+To keep the modularity of the sugo modules (and because each project has different logging needs), the request logging must be made through user middleware. We leave an example of such middleware for common cases.
 
 ```typescript
-import { createServer, SuGoRequest, SuGoResponse } from '@sugo/server';
-const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
-  res.status(200).json({ first: req.first, second: req.second }),
-).setLogger(customLogger);
-```
+import { SuGoRequest, SuGoResponse } from '@sugo/server';
+import * as util from 'util';
 
-The logger can be accesed via req.logger, res.logger or server.logger.
+const logRequest = async (req: SuGoRequest, res: SuGoResponse, next?: () => any) => {
+  let log: string = util.format('Request ID: ( %s ) %s: %s', req.id, req.method, req.url);
+  log += util.format(' --> query %j', req.query);
+  log += util.format(' --> body %j', req.body);
+  logger.info(log);
+  return next ? await next() : null;
+};
+
+const logResponse = async (req: SuGoRequest, res: SuGoResponse, next?: () => any) => {
+  next ? await next() : null;
+  const now = new Date().toISOString();
+  const { id, statusCode, statusMessage, body, method, url } = res;
+  const log = `${now}: Response ID: ( ${id} ) ${method}: ${url} ${statusCode} ${statusMessage} ---> body: ${JSON.stringify(
+    body,
+  )}`;
+  if (statusCode >= 400) {
+    logger.error(log);
+  } else {
+    logger.info(log);
+  }
+  return;
+};
+
+const server = createServer(HANDLER)
+  .useMiddleware(logRequest)
+  .useMiddleware(logResponse);
+```
 
 ## **Helper methods**
 

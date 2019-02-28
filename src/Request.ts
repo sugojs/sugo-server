@@ -7,7 +7,6 @@ export class SuGoRequest extends IncomingMessage {
     .toString(36)
     .substr(2);
   public body?: any = {};
-  public rawBody?: Buffer = Buffer.from('', 'utf8');
   public query?: IDynamicObject = {};
   public params?: IDynamicObject = {};
   [key: string]: any;
