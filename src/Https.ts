@@ -1,8 +1,7 @@
 import * as assert from 'assert';
 import { Server, ServerOptions } from 'https';
 import { ErrorHandlingBehavior, IError, IErrorHandler, IErrorHandlingBehavior } from './Behaviors/ErrorHandling';
-import { ILogger, ILogginBehavior, LogginBehavior } from './Behaviors/Logging';
-import { IMiddlewareBehavior, INextFunction, MiddlewareBehavior } from './Behaviors/Middleware';
+import { IMiddlewareBehavior, MiddlewareBehavior } from './Behaviors/Middleware';
 import { IHandler } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
@@ -10,7 +9,6 @@ import SuGoResponse from './Response';
 export * from './Interfaces';
 
 export class SuGoSecureServer extends Server {
-  public loggingBehavior: ILogginBehavior = new LogginBehavior();
   public errorHandlingBehavior: IErrorHandlingBehavior = new ErrorHandlingBehavior();
   public middlewareBehavior: IMiddlewareBehavior = new MiddlewareBehavior();
 
@@ -25,10 +23,8 @@ export class SuGoSecureServer extends Server {
     const self = this;
     this.addListener('request', async (req: SuGoRequest, res: SuGoResponse) => {
       try {
-        req.setLogger(self.logger).parseUrl();
-        res.setLogger(self.logger);
         res.id = req.id;
-        res.path = req.path;
+        res.url = req.url;
         res.method = req.method;
         await req.getBody(); // Adds body property to request
         return await this.runStack(req, res, requestHandler);
@@ -36,15 +32,6 @@ export class SuGoSecureServer extends Server {
         self.handleError(req, res, err);
       }
     });
-  }
-
-  public get logger() {
-    return this.loggingBehavior.logger;
-  }
-
-  public setLogger(logger: ILogger) {
-    this.loggingBehavior.setLogger(logger);
-    return this;
   }
 
   public get middleware() {

@@ -1,6 +1,4 @@
 import * as chai from 'chai';
-import * as cors from 'cors';
-import * as path from 'path';
 import * as supertest from 'supertest';
 import { INextFunction } from '../Behaviors/Middleware';
 import { createServer } from '../index';
@@ -8,11 +6,9 @@ import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
 import CustomError from './CustomError';
 import CustomHandledError from './CustomHandledError';
-import DummyLogger from './DummyLogger';
 
 const PATH = '/foo';
 const headers = { 'Content-Type': 'application/json' };
-const dummyLogger = new DummyLogger();
 const HANDLER = (req: SuGoRequest, res: SuGoResponse) => {
   res.writeHead(200, headers);
   res.end(
@@ -22,10 +18,10 @@ const HANDLER = (req: SuGoRequest, res: SuGoResponse) => {
         files: req.files,
         id: req.id,
         method: req.method,
-        path: req.path,
+        url: req.url,
         query: req.query,
       },
-      res: { id: res.id, path: res.path, method: res.method },
+      res: { id: res.id, url: res.url, method: res.method },
     }),
   );
 };
@@ -33,7 +29,7 @@ chai.should();
 
 // Our parent block
 describe('SuGo Server', () => {
-  const server = createServer(HANDLER).setLogger(dummyLogger);
+  const server = createServer(HANDLER);
   describe(`Request`, () => {
     it('The request id should be set', async () => {
       const response = await supertest(server)
@@ -42,59 +38,9 @@ describe('SuGo Server', () => {
       response.body.req.should.have.property('id');
     });
 
-    it('The request path should be set', async () => {
+    it('The request url should be set', async () => {
       const response = await supertest(server).get(PATH);
-      response.body.req.should.have.property('path');
-    });
-
-    it('The request body should be set if post data is sent', async () => {
-      const response = await supertest(server)
-        .post(PATH)
-        .send({ foo: 'fighters' });
-      response.body.req.should.have.property('body');
-      response.body.req.body.should.have.property('foo');
-      response.body.req.body.foo.should.be.eql('fighters');
-    });
-
-    it('The request query should be set if queryparams are sent', async () => {
-      const response = await supertest(server)
-        .get(PATH)
-        .query({ foo: 'fighters' });
-      response.body.req.should.have.property('query');
-      response.body.req.query.should.have.property('foo');
-      response.body.req.query.foo.should.be.eql('fighters');
-    });
-
-    it('should accept string body', async () => {
-      const response = await supertest(server)
-        .get(PATH)
-        .type('text/plain')
-        .send('Hello world');
-      response.body.req.should.have.property('body');
-      response.body.req.body.should.be.eql('Hello world');
-    });
-
-    it('should accept a file attachtment', async () => {
-      const response = await supertest(server)
-        .get(PATH)
-        .attach('attachment', path.resolve(__dirname, 'server.key'));
-      response.body.req.should.have.property('files');
-    });
-
-    it('should accept form-data fields', async () => {
-      const response = await supertest(server)
-        .get(PATH)
-        .field('api_key', 'hello world');
-      response.body.req.should.have.property('files');
-    });
-
-    it('should accept form-data fields and multiple files', async () => {
-      const response = await supertest(server)
-        .get(PATH)
-        .field('api_key', 'hello world')
-        .attach('attachment', path.resolve(__dirname, 'server.key'))
-        .attach('attachment', path.resolve(__dirname, 'server.cert'));
-      response.body.req.should.have.property('files');
+      response.body.req.should.have.property('url');
     });
   });
 
@@ -107,10 +53,10 @@ describe('SuGo Server', () => {
       response.body.res.id.should.be.eql(response.body.req.id);
     });
 
-    it('The response path should be equal to the request path', async () => {
+    it('The response path should be equal to the request url', async () => {
       const response = await supertest(server).get(PATH);
-      response.body.res.should.have.property('path');
-      response.body.res.path.should.be.eql(response.body.req.path);
+      response.body.res.should.have.property('url');
+      response.body.res.url.should.be.eql(response.body.req.url);
     });
 
     it('The response method should be equal to the request method', async () => {
@@ -124,7 +70,7 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         res.status(status);
         res.json({});
-      }).setLogger(dummyLogger);
+      });
       const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(status);
     });
@@ -134,7 +80,7 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         res.status(status);
         res.json({ foo: 'fighters' });
-      }).setLogger(dummyLogger);
+      });
       const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(status);
       response.body.should.have.property('foo');
@@ -146,7 +92,7 @@ describe('SuGo Server', () => {
     it('should run the added middleware', async () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) =>
         res.json({ first: req.first, second: req.second }),
-      ).setLogger(dummyLogger);
+      );
       newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
         req.first = true;
         if (next) {
@@ -170,7 +116,7 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         req.handlerPassed = true;
         res.json({});
-      }).setLogger(dummyLogger);
+      });
       newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
         req.handlerPassed = false;
         req.middlewarePassed = false;
@@ -194,7 +140,7 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         req.handlerPassed = true;
         res.json({});
-      }).setLogger(dummyLogger);
+      });
       newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
         throw new Error('MiddlewareError');
       });
@@ -209,7 +155,7 @@ describe('SuGo Server', () => {
       const errorMessage = 'New error';
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new Error(errorMessage);
-      }).setLogger(dummyLogger);
+      });
       const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(500);
       response.body.name.should.be.eql('Error');
@@ -220,7 +166,7 @@ describe('SuGo Server', () => {
       const errorMessage = 'New error';
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new CustomError('New error');
-      }).setLogger(dummyLogger);
+      });
       const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql('CustomError');
@@ -232,7 +178,7 @@ describe('SuGo Server', () => {
       const errorMessage = 'New error';
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
         throw new CustomHandledError('New error');
-      }).setLogger(dummyLogger);
+      });
       const response = await supertest(newServer).get(PATH);
       response.status.should.be.eql(400);
       response.body.name.should.be.eql('CustomHandledError');
