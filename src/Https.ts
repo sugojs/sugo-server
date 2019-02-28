@@ -24,8 +24,8 @@ export class SuGoSecureServer extends Server {
     this.addListener('request', async (req: SuGoRequest, res: SuGoResponse) => {
       try {
         res.id = req.id;
-        res.url = req.url;
-        res.method = req.method;
+        res.url = req.url || '';
+        res.method = req.method || '';
         await req.getBody(); // Adds body property to request
         return await this.runStack(req, res, requestHandler);
       } catch (err) {

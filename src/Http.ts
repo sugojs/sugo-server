@@ -25,8 +25,8 @@ export class SuGoServer extends Server {
         req.path = path;
         req.query = query;
         res.id = req.id;
-        res.url = req.url;
-        res.method = req.method;
+        res.url = req.url || '';
+        res.method = req.method || '';
         return await this.runStack(req, res, requestHandler);
       } catch (err) {
         self.handleError(req, res, err);

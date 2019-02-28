@@ -3,10 +3,10 @@ import { IDynamicObject } from './Interfaces';
 const ServerResponse = http.ServerResponse;
 
 export class SuGoResponse extends ServerResponse implements IDynamicObject {
-  public body?: IDynamicObject = {};
-  public id?: string = '';
-  public method?: string = '';
-  public url?: string = '';
+  public body: IDynamicObject = {};
+  public id: string = '';
+  public method: string = '';
+  public url: string = '';
 
   public status(code: number) {
     this.statusCode = code;
