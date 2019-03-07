@@ -171,20 +171,7 @@ describe('SuGo Server', () => {
       response.status.should.be.eql(400);
       response.body.name.should.be.eql('CustomError');
       response.body.message.should.be.eql(errorMessage);
-      response.body.should.not.have.property('extraData');
-    });
-
-    it("should handle the custom error with it's handle method", async () => {
-      const errorMessage = 'New error';
-      const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
-        throw new CustomHandledError('New error');
-      });
-      const response = await supertest(newServer).get(PATH);
-      response.status.should.be.eql(400);
-      response.body.name.should.be.eql('CustomHandledError');
-      response.body.message.should.be.eql(errorMessage);
       response.body.should.have.property('extraData');
-      response.body.extraData.should.be.eql(true);
     });
   });
 

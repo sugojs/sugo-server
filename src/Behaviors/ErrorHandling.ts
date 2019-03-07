@@ -1,3 +1,4 @@
+import { IDynamicObject } from '../Interfaces';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
 
@@ -18,23 +19,18 @@ export interface IErrorHandlingBehavior {
 }
 
 export class ErrorHandlingBehavior implements IErrorHandlingBehavior {
-  public handleError: IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IError) => {
-    /* If the error object has a handle method we use it */
-    if (typeof err.handle === 'function') {
-      err.handle(req, res);
-    } else {
-      const json = {
-        code: err.code || 'N/A',
-        message: err.message || 'Unexpected Error',
-        name: err.name || err.constructor.name,
-        stack: '',
-        status: err.status || 500,
-      };
-      if (err.stack) {
-        json.stack = err.stack;
-      }
-      res.status(json.status).json(json);
-    }
+  public handleError: IErrorHandler = (req: SuGoRequest, res: SuGoResponse, err: IDynamicObject) => {
+    const defaultValues = {
+      code: 'N/A',
+      message: 'Unexpected Error',
+      name: err.name ? err.name : err.constructor.name ? err.constructor.name : 'Error',
+      status: 500,
+    };
+    const json = Object.getOwnPropertyNames(err).reduce((obj: IDynamicObject, key: string) => {
+      obj[key] = err[key];
+      return obj;
+    }, defaultValues);
+    res.status(json.status).json(json);
   };
   public setErrorHandler(fn: IErrorHandler) {
     this.handleError = fn;

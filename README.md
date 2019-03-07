@@ -88,22 +88,17 @@ The server uses the following default handler:
 ```typescript
 class SuGoServer extends Server {
   public defaultErrorHandler(req: SuGoRequest, res: SuGoResponse, err: IError) {
-    /* If the error object has a handle method we use it */
-    if (typeof err.handle === 'function') {
-      err.handle(req, res);
-    } else {
-      const json = {
-        code: err.code || 'N/A',
-        message: err.message || 'Unexpected Error',
-        name: err.name || err.constructor.name,
-        stack: '',
-        status: err.status || 500,
-      };
-      if (err.stack) {
-        json.stack = err.stack;
-      }
-      res.status(json.status).json(json);
-    }
+    const defaultValues = {
+      code: 'N/A',
+      message: 'Unexpected Error',
+      name: err.name ? err.name : err.constructor.name ? err.constructor.name : 'Error',
+      status: 500,
+    };
+    const json = Object.getOwnPropertyNames(err).reduce((obj: IDynamicObject, key: string) => {
+      obj[key] = err[key];
+      return obj;
+    }, defaultValues);
+    res.status(json.status).json(json);
   }
 }
 ```
