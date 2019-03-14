@@ -29,7 +29,7 @@ export class SuGoServer extends Server {
         res.method = req.method || '';
         return await this.runStack(req, res, requestHandler);
       } catch (err) {
-        self.handleError(req, res, err);
+        return self.handleError(req, res, err);
       }
     });
   }
