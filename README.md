@@ -29,7 +29,7 @@ All this is implemented on a Server class that can be subclassed in order to ext
 
 ## **Requirements**
 
-node version >= 9.11.2
+node version >= 8.12.0
 
 ## **How to install**
 
@@ -46,6 +46,7 @@ import { createServer, SuGoRequest, SuGoResponse, INextFunction } from '@sugo/se
 const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
   res.status(200).json({ first: req.first, second: req.second }),
 );
+server.listen(3000);
 ```
 
 ## **Creating a Https Server**
@@ -61,6 +62,7 @@ const server = createSecureServer(
     key: fs.readFileSync(path.resolve(__dirname, 'server.key')),
   },
 );
+server.listen(3000);
 ```
 
 ## **Middleware**
@@ -79,6 +81,7 @@ server.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFun
     await next();
   }
 });
+server.listen(3000);
 ```
 
 ## **Error handling**
@@ -146,6 +149,7 @@ const logResponse = async (req: SuGoRequest, res: SuGoResponse, next?: () => any
 const server = createServer(HANDLER)
   .useMiddleware(logRequest)
   .useMiddleware(logResponse);
+server.listen(3000);
 ```
 
 ## **Helper methods**
@@ -155,10 +159,10 @@ const server = createServer(HANDLER)
 
 ```typescript
 import { createServer, SuGoRequest, SuGoResponse } from '@sugo/server';
-const server = createServer(
-  (req: SuGoRequest, res: SuGoResponse) => res.status(200).json({ first: req.first, second: req.second }),
-  customLogger,
+const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
+  res.status(200).json({ first: req.first, second: req.second }),
 );
+server.listen(3000);
 ```
 
 ## **Additional Properties - Request**
@@ -193,4 +197,5 @@ server.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFun
     await next();
   }
 });
+server.listen(3000);
 ```
