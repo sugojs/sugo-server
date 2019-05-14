@@ -86,27 +86,36 @@ server.listen(3000);
 
 ## **Error handling**
 
-The server uses the following default handler:
+To keep the modularity of the lme modules (and because each project has different error handling needs), the error handling must be made through user middleware. We leave an example of such middleware for common cases.
+
+**IMPORTANT NOTE:** The error handling middleware will only catch errors after it was set, so it should be the **FIRST** middleware to be set.
+
+Example:
 
 ```typescript
-class SuGoServer extends Server {
-  public defaultErrorHandler(req: SuGoRequest, res: SuGoResponse, err: IError) {
-    const defaultValues = {
-      code: 'N/A',
-      message: 'Unexpected Error',
-      name: err.name ? err.name : err.constructor.name ? err.constructor.name : 'Error',
-      status: 500,
-    };
-    const json = Object.getOwnPropertyNames(err).reduce((obj: IDynamicObject, key: string) => {
-      obj[key] = err[key];
-      return obj;
-    }, defaultValues);
-    res.status(json.status).json(json);
-  }
-}
+import { createServer, SuGoRequest, SuGoResponse, INextFunction } from '@sugo/server';
+const server = createServer((req: SuGoRequest, res: SuGoResponse) =>
+  res.status(200).json({ first: req.first, second: req.second }),
+)
+  .useMiddleware(async (req, res, next) => {
+    try {
+      await next();
+    } catch (err) {
+      const defaultValues = {
+        code: 'N/A',
+        message: 'Unexpected Error',
+        name: err.name ? err.name : err.constructor.name ? err.constructor.name : 'Error',
+        status: 500,
+      };
+      const json: any = Object.getOwnPropertyNames(err).reduce((obj, key) => {
+        obj[key] = err[key];
+        return obj;
+      }, defaultValues);
+      res.status(json.status).json(json);
+    }
+  })
+  .listen(3000);
 ```
-
-The idea behind this handler is to give custom exceptions the power to define how should they be handled. This can be useful if the exception has custom data. If this error handler does not fufill your needs, it can be replaced with the server.setErrorHandler method that receives a function with the same signature.
 
 ## **Request body extraction**
 

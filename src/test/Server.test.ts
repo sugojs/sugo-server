@@ -4,8 +4,6 @@ import { INextFunction } from '../Behaviors/Middleware';
 import { createServer } from '../index';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
-import CustomError from './CustomError';
-import CustomHandledError from './CustomHandledError';
 
 const PATH = '/foo';
 const headers = { 'Content-Type': 'application/json' };
@@ -134,44 +132,6 @@ describe('SuGo Server', () => {
       });
       const response = await supertest(newServer).get(PATH);
       response.status.should.have.be.eql(200);
-    });
-
-    it('should handle the middleware errors', async () => {
-      const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
-        req.handlerPassed = true;
-        res.json({});
-      });
-      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
-        throw new Error('MiddlewareError');
-      });
-      const response = await supertest(newServer).get(PATH);
-      response.status.should.have.be.eql(500);
-      response.body.message.should.be.eql('MiddlewareError');
-    });
-  });
-
-  describe(`Error handler`, () => {
-    it('should handle the unexpected error', async () => {
-      const errorMessage = 'New error';
-      const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
-        throw new Error(errorMessage);
-      });
-      const response = await supertest(newServer).get(PATH);
-      response.status.should.be.eql(500);
-      response.body.name.should.be.eql('Error');
-      response.body.message.should.be.eql(errorMessage);
-    });
-
-    it('should handle the custom error the default way', async () => {
-      const errorMessage = 'New error';
-      const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
-        throw new CustomError('New error');
-      });
-      const response = await supertest(newServer).get(PATH);
-      response.status.should.be.eql(400);
-      response.body.name.should.be.eql('CustomError');
-      response.body.message.should.be.eql(errorMessage);
-      response.body.should.have.property('extraData');
     });
   });
 
