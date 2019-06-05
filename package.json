@@ -23,11 +23,7 @@
     "email": "franciscojsucreg@gmail.com",
     "url": "https://github.com/franciscosucre"
   },
-  "dependencies": {
-    "@types/express": "^4.16.1",
-    "@types/node": "^10.12.21",
-    "formidable": "^1.2.1"
-  },
+  "dependencies": {},
   "license": "ISC",
   "keywords": [
     "server",
@@ -35,6 +31,7 @@
     "request"
   ],
   "devDependencies": {
+    "@types/node": "^10.12.21",
     "@types/chai": "^4.1.7",
     "@types/cors": "^2.8.4",
     "@types/formidable": "^1.0.31",
