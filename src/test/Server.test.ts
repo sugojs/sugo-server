@@ -133,6 +133,26 @@ describe('SuGo Server', () => {
       const response = await supertest(newServer).get(PATH);
       response.status.should.have.be.eql(200);
     });
+
+    it('Should throw an error if an error is passed to the next method', async () => {
+      const newServer = createServer((req: SuGoRequest, res: SuGoResponse) => {
+        req.handlerPassed = true;
+        res.json({});
+      });
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+        try {
+          next ? await next(new Error('NewError')) : null;
+          chai.assert.fail();
+        } catch (error) {
+          error.message.should.be.eql('NewError');
+        }
+      });
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+        if (next) {
+          await next(new Error('NewError'));
+        }
+      });
+    });
   });
 
   after(() => {

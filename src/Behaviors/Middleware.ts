@@ -2,7 +2,7 @@ import { IHandler } from '../Interfaces';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
 
-export type INextFunction = () => any;
+export type INextFunction = (error?: any) => any;
 
 export interface IMiddlewareBehavior {
   middleware: IHandler[];
@@ -21,7 +21,11 @@ export class MiddlewareBehavior implements IMiddlewareBehavior {
   public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IHandler) {
     let idx = 0;
 
-    const next: INextFunction = async (): Promise<void> => {
+    const next: INextFunction = async (err?: any): Promise<void> => {
+      // For ExpressJS Compability, we verify if an error was given, if it was, we throw that error
+      if (err) {
+        throw err;
+      }
       if (idx >= this.middleware.length) {
         return await requestHandler(req, res);
       }
