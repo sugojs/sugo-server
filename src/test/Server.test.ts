@@ -91,13 +91,13 @@ describe('SuGo Server', () => {
       const newServer = createServer((req: SuGoRequest, res: SuGoResponse) =>
         res.json({ first: req.first, second: req.second }),
       );
-      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next: INextFunction) => {
         req.first = true;
         if (next) {
           await next();
         }
       });
-      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
+      newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next: INextFunction) => {
         req.second = true;
         if (next) {
           await next();

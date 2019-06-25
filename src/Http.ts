@@ -3,14 +3,14 @@ const Server = http.Server;
 import * as assert from 'assert';
 import { parse } from 'url';
 import { IMiddlewareBehavior, MiddlewareBehavior } from './Behaviors/Middleware';
-import { IHandler } from './Interfaces';
+import { IMiddlewareHandler, IRequestHandler } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
 
 export class SuGoServer extends Server {
   public middlewareBehavior: IMiddlewareBehavior = new MiddlewareBehavior();
 
-  constructor(requestHandler: IHandler) {
+  constructor(requestHandler: IRequestHandler) {
     super({
       IncomingMessage: SuGoRequest,
       ServerResponse: SuGoResponse,
@@ -32,12 +32,12 @@ export class SuGoServer extends Server {
     return this.middlewareBehavior.middleware;
   }
 
-  public useMiddleware(fn: IHandler) {
+  public useMiddleware(fn: IMiddlewareHandler) {
     this.middlewareBehavior.useMiddleware(fn);
     return this;
   }
 
-  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IHandler) {
+  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) {
     await this.middlewareBehavior.runStack(req, res, requestHandler);
     return this;
   }

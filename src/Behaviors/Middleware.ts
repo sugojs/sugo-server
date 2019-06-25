@@ -1,24 +1,24 @@
-import { IHandler } from '../Interfaces';
+import { IMiddlewareHandler, IRequestHandler } from '../Interfaces';
 import SuGoRequest from '../Request';
 import SuGoResponse from '../Response';
 
 export type INextFunction = (error?: any) => any;
 
 export interface IMiddlewareBehavior {
-  middleware: IHandler[];
-  useMiddleware: (fn: IHandler) => any;
-  runStack: (req: SuGoRequest, res: SuGoResponse, requestHandler: IHandler) => any;
+  middleware: IMiddlewareHandler[];
+  useMiddleware: (fn: IMiddlewareHandler) => any;
+  runStack: (req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) => any;
 }
 
 export class MiddlewareBehavior implements IMiddlewareBehavior {
-  public middleware: IHandler[] = [];
+  public middleware: IMiddlewareHandler[] = [];
 
-  public useMiddleware(fn: IHandler) {
+  public useMiddleware(fn: IMiddlewareHandler) {
     this.middleware.push(fn);
     return this;
   }
 
-  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IHandler) {
+  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) {
     let idx = 0;
 
     const next: INextFunction = async (err?: any): Promise<void> => {

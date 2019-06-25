@@ -2,16 +2,16 @@ import * as assert from 'assert';
 import { Server, ServerOptions } from 'https';
 import { parse } from 'url';
 import { IMiddlewareBehavior, MiddlewareBehavior } from './Behaviors/Middleware';
-import { IHandler } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
+import { IRequestHandler } from './Interfaces';
 
 export * from './Interfaces';
 
 export class SuGoSecureServer extends Server {
   public middlewareBehavior: IMiddlewareBehavior = new MiddlewareBehavior();
 
-  constructor(requestHandler: IHandler, options: ServerOptions) {
+  constructor(requestHandler: IRequestHandler, options: ServerOptions) {
     super({
       IncomingMessage: SuGoRequest,
       ServerResponse: SuGoResponse,
@@ -35,12 +35,12 @@ export class SuGoSecureServer extends Server {
     return this.middlewareBehavior.middleware;
   }
 
-  public useMiddleware(fn: IHandler) {
+  public useMiddleware(fn: IRequestHandler) {
     this.middlewareBehavior.useMiddleware(fn);
     return this;
   }
 
-  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IHandler) {
+  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) {
     await this.middlewareBehavior.runStack(req, res, requestHandler);
     return this;
   }
