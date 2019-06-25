@@ -2,9 +2,9 @@ import * as assert from 'assert';
 import { Server, ServerOptions } from 'https';
 import { parse } from 'url';
 import { IMiddlewareBehavior, MiddlewareBehavior } from './Behaviors/Middleware';
+import { IRequestHandler } from './Interfaces';
 import SuGoRequest from './Request';
 import SuGoResponse from './Response';
-import { IRequestHandler } from './Interfaces';
 
 export * from './Interfaces';
 
