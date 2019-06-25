@@ -141,7 +141,7 @@ describe('SuGo Server', () => {
       });
       newServer.useMiddleware(async (req: SuGoRequest, res: SuGoResponse, next?: INextFunction) => {
         try {
-          next ? await next(new Error('NewError')) : chai.assert.fail();;
+          next ? await next(new Error('NewError')) : chai.assert.fail();
         } catch (error) {
           error.message.should.be.eql('NewError');
         }
