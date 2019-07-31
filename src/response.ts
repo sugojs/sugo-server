@@ -1,5 +1,6 @@
 import * as http from 'http';
-import { IDynamicObject } from './Interfaces';
+
+import { IDynamicObject } from './interfaces';
 const ServerResponse = http.ServerResponse;
 
 export class SuGoResponse extends ServerResponse implements IDynamicObject {
@@ -8,9 +9,9 @@ export class SuGoResponse extends ServerResponse implements IDynamicObject {
   public method: string = '';
   public url: string = '';
 
-  public status(code: number) {
-    this.statusCode = code;
-    return this;
+  public end(data?: any) {
+    this.body = data;
+    return super.end(data);
   }
 
   public json(data: any) {
@@ -19,14 +20,14 @@ export class SuGoResponse extends ServerResponse implements IDynamicObject {
     return this;
   }
 
+  public status(code: number) {
+    this.statusCode = code;
+    return this;
+  }
+
   public write(data: any) {
     this.body = data;
     return super.write(data);
-  }
-
-  public end(data?: any) {
-    this.body = data;
-    return super.end(data);
   }
 }
 

@@ -1,6 +1,6 @@
-import { INextFunction } from './Behaviors';
-import SuGoRequest from './Request';
-import SuGoResponse from './Response';
+import { INextFunction } from './behaviors';
+import SuGoRequest from './request';
+import SuGoResponse from './response';
 
 export interface IDynamicObject {
   [key: string]: any;

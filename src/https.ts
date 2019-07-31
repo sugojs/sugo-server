@@ -1,14 +1,18 @@
 import * as assert from 'assert';
 import { Server, ServerOptions } from 'https';
 import { parse } from 'url';
-import { IMiddlewareBehavior, MiddlewareBehavior } from './Behaviors/Middleware';
-import { IRequestHandler } from './Interfaces';
-import SuGoRequest from './Request';
-import SuGoResponse from './Response';
 
-export * from './Interfaces';
+import { IMiddlewareBehavior, MiddlewareBehavior } from './behaviors/middleware';
+import { IRequestHandler } from './interfaces';
+import SuGoRequest from './request';
+import SuGoResponse from './response';
+
+export * from './interfaces';
 
 export class SuGoSecureServer extends Server {
+  public get middleware() {
+    return this.middlewareBehavior.middleware;
+  }
   public middlewareBehavior: IMiddlewareBehavior = new MiddlewareBehavior();
 
   constructor(requestHandler: IRequestHandler, options: ServerOptions) {
@@ -31,17 +35,13 @@ export class SuGoSecureServer extends Server {
     });
   }
 
-  public get middleware() {
-    return this.middlewareBehavior.middleware;
+  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) {
+    await this.middlewareBehavior.runStack(req, res, requestHandler);
+    return this;
   }
 
   public useMiddleware(fn: IRequestHandler) {
     this.middlewareBehavior.useMiddleware(fn);
-    return this;
-  }
-
-  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) {
-    await this.middlewareBehavior.runStack(req, res, requestHandler);
     return this;
   }
 }

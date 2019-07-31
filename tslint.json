@@ -1,3 +1,50 @@
 {
-  "extends": ["tslint:recommended", "tslint-config-prettier"]
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
+  "rules": {
+    "ordered-imports": { "options": { "grouped-imports": true } },
+    "max-line-length": [true, 120],
+    "member-ordering": [
+      true,
+      {
+        "order": [
+          "public-static-field",
+          "public-instance-field",
+          "public-constructor",
+          "private-static-field",
+          "private-instance-field",
+          "private-constructor",
+          "public-instance-method",
+          "protected-instance-method",
+          "private-instance-method"
+        ],
+        "alphabetize": true
+      }
+    ],
+    "indent": true,
+    "semicolon": true,
+    "radix": false,
+    "class-name": true,
+    "arrow-return-shorthand": true,
+    "adjacent-overload-signatures": true,
+    "array-type": { "options": "array-simple" },
+    "binary-expression-operand-order": true,
+    "curly": false,
+    "cyclomatic-complexity": true,
+    "encoding": true,
+    "eofline": true,
+    "file-name-casing": [true, "kebab-case"],
+    "import-spacing": true,
+    "interface-name": true,
+    "interface-over-type-literal": false,
+    "linebreak-style": true,
+    "match-default-export-name": false,
+    "max-file-line-count": true,
+    "new-parens": true,
+    "newline-per-chained-call": true,
+    "no-consecutive-blank-lines": true,
+    "no-default-export": true,
+    "no-duplicate-imports": true,
+    "no-duplicate-super": true,
+    "no-duplicate-variable": true
+  }
 }

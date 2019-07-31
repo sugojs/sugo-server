@@ -1,13 +1,17 @@
-import * as http from 'http';
-const Server = http.Server;
 import * as assert from 'assert';
+import * as http from 'http';
 import { parse } from 'url';
-import { IMiddlewareBehavior, MiddlewareBehavior } from './Behaviors/Middleware';
-import { IMiddlewareHandler, IRequestHandler } from './Interfaces';
-import SuGoRequest from './Request';
-import SuGoResponse from './Response';
+
+import { IMiddlewareBehavior, MiddlewareBehavior } from './behaviors/middleware';
+import { IMiddlewareHandler, IRequestHandler } from './interfaces';
+import SuGoRequest from './request';
+import SuGoResponse from './response';
+const Server = http.Server;
 
 export class SuGoServer extends Server {
+  public get middleware() {
+    return this.middlewareBehavior.middleware;
+  }
   public middlewareBehavior: IMiddlewareBehavior = new MiddlewareBehavior();
 
   constructor(requestHandler: IRequestHandler) {
@@ -28,17 +32,13 @@ export class SuGoServer extends Server {
     });
   }
 
-  public get middleware() {
-    return this.middlewareBehavior.middleware;
+  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) {
+    await this.middlewareBehavior.runStack(req, res, requestHandler);
+    return this;
   }
 
   public useMiddleware(fn: IMiddlewareHandler) {
     this.middlewareBehavior.useMiddleware(fn);
-    return this;
-  }
-
-  public async runStack(req: SuGoRequest, res: SuGoResponse, requestHandler: IRequestHandler) {
-    await this.middlewareBehavior.runStack(req, res, requestHandler);
     return this;
   }
 }

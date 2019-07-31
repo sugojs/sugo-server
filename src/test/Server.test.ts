@@ -1,9 +1,10 @@
 import * as chai from 'chai';
 import * as supertest from 'supertest';
-import { INextFunction } from '../Behaviors/Middleware';
+
+import { INextFunction } from '../behaviors/middleware';
 import { createServer } from '../index';
-import SuGoRequest from '../Request';
-import SuGoResponse from '../Response';
+import SuGoRequest from '../request';
+import SuGoResponse from '../response';
 
 const PATH = '/foo';
 const headers = { 'Content-Type': 'application/json' };
